@@ -23,7 +23,7 @@ class Scene():
         sun1 = Planet(self, name = "sun1", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
         sun2 = Planet(self, name = "sun2", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
         sun2.set_orbit(sun1, 0, 100, 100)
-        self.planetList.add(sun1, sun2)
+        self.planetList.add(sun, earth)
 
 
     def run(self):
@@ -39,5 +39,16 @@ class Scene():
         
     def blit_screen(self): #NOTE always called last!!!
         self.planetList.draw(self.surface)
+        self.draw_orbit()
 
         self.simulation.screen.blit(self.surface,(0,0))
+
+    def draw_orbit(self):
+        for planet in self.planetList:
+            # for stationary planets with no orbit lines
+            if not planet.orbitLine:
+                continue
+            prevPoint = planet.orbitLine[0]
+            for point in planet.orbitLine:
+                pygame.draw.line(self.surface, planet.Color, point, prevPoint, 1)
+                prevPoint = point

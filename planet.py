@@ -25,15 +25,13 @@ class Planet(pygame.sprite.Sprite):
         self.name = name
         
         self.rect : pygame.FRect = self.image.get_frect()
-
+        
         self.Position = pygame.Vector2(0,0)
         self.Velocity = pygame.Vector2(0,0)
         self.Acceleration = pygame.Vector2(0,0)
-        # self.X = 0.
-        # self.Y = 0.
-        # self.VelocityX, self.VelocityY = 0., 0.
-        # self.AccelerationX, self.AccelerationY = 0., 0.
         
+        #self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+
         self.Mass = mass
         
         self.isStationary = stationary
@@ -61,11 +59,17 @@ class Planet(pygame.sprite.Sprite):
 
             self.Velocity += -totalAccel * self.TIMESTEP
             self.Position += self.Velocity * self.TIMESTEP
+
+            # TODO 
+            self.orbitLine.append(self.rect.center)
+            if len(self.orbitLine) > 50:
+                self.orbitLine.pop(0)
+
+        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+            
             
 
     
-
-        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
 
 
     def attraction(self, body):
@@ -112,6 +116,8 @@ class Planet(pygame.sprite.Sprite):
         self.Velocity.x = parent.Velocity.x - velocity*sin(radians(initialAnomaly + periapsisAngle))
         self.Velocity.y = parent.Velocity.y + velocity*cos(radians(initialAnomaly + periapsisAngle))
         
+        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+        self.orbitLine = [self.rect.center]
 
         
     # TODO collisions
