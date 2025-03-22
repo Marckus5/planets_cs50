@@ -1,5 +1,5 @@
 import pygame
-from math import sin, cos, atan2, sqrt
+from math import sin, cos, atan2, sqrt, cos, radians
 
 
 WHITE = (255,255,255)
@@ -48,7 +48,7 @@ class Planet(pygame.sprite.Sprite):
                 totalAccelX += ax
                 totalAccelY += ay
             
-            self.VelocityX += -(totalAccelX)# * self.TIMESTEP)
+            self.VelocityX += -(totalAccelX)
             self.VelocityY += -(totalAccelY)# * self.TIMESTEP)
             
             self.X += self.VelocityX
@@ -72,9 +72,29 @@ class Planet(pygame.sprite.Sprite):
 
         return accelX, accelY
     
-    # TODO
-    def init_orbit(self, body):
-         pass
+    # TODO generates an orbit from parameters
+    def set_orbit(self, body, initialAnomaly : float, apoapsis : float, periapsis : float):
+
+        # semi-major and semi-minor axes
+        semiMajorAxis = (apoapsis + periapsis) / 2
+        semiMinorAxis = sqrt(apoapsis * periapsis)
+        # eccentricity
+        eccentricity = sqrt(1 - (semiMinorAxis**2/semiMajorAxis**2))
+
+        # TODO: determine orbital position
+        r = semiMajorAxis * ((1 - eccentricity**2)/ (1 + eccentricity*cos(radians(initialAnomaly))))
+        
+        # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
+        self.X = r*cos(radians(initialAnomaly))
+        self.Y = r*sin(radians(initialAnomaly))
+
+        # determine velocity
+        velocity = sqrt(body.Mass/ r) # TODO implement the constants
+        self.VelocityX = velocity*sin(radians(initialAnomaly))
+        self.VelocityY = velocity*cos(radians(initialAnomaly))
+
+        
+        
 
 
     

@@ -29,10 +29,12 @@ class Simulation():
         # self.state = 0
 
     def run(self):
-        fps = 60
+        self.FPS = 60
+        self.DELTATIME = 1/self.FPS
         self.scene = Scene(self.screen, 0)
         while self.running:
-            self.clock.tick(fps)
+            self.DELTATIME = self.clock.tick(self.FPS)/ 1000
+
             self.check_events()
 
             self.screen.fill((0,0,0))

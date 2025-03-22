@@ -13,11 +13,13 @@ class Scene():
 
         sun = Planet(self, mass = 200, color = 'yellow', radius = 16, stationary=True)
         earth = Planet(self, mass = 1, color = 'blue', radius = 4)
-        earth.X, earth.Y = 100, 100
-        earth.VelocityX = 1
-        earth.VelocityY = -1
+        mars = Planet(self, mass = 1, color = 'red', radius = 4)
+        
 
-        self.planetList.add(sun, earth)
+        earth.set_orbit(sun, 0, 100, 100)
+        mars.set_orbit(sun, 180, 200, 200)
+
+        self.planetList.add(sun, earth, mars)
 
 
     def run(self):
@@ -26,6 +28,11 @@ class Scene():
 
         self.surface.fill('black')
         self.blit_screen()
+
+        for planet in self.planetList:
+            #print(planet.X, planet.Y)
+            #print()
+            pass
 
         
     def blit_screen(self): #NOTE always called last!!!
