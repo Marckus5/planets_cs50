@@ -10,7 +10,7 @@ class Planet(pygame.sprite.Sprite):
     SCALE : float = 50/AU
     
 
-    def __init__(self, scene, mass : float, color, radius : int, stationary : bool = False):
+    def __init__(self, scene, name: str, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
         self.scene = scene
         self.WIDTH, self.HEIGHT = self.scene.simulation.screen.get_size()
@@ -21,57 +21,67 @@ class Planet(pygame.sprite.Sprite):
         self.Color = color
         self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(self.image, color, (radius, radius), radius)
+
+        self.name = name
         
         self.rect : pygame.FRect = self.image.get_frect()
 
-        self.X = 0.
-        self.Y = 0.
-        self.rect.center = (self.X + (self.WIDTH//2), -self.Y + (self.HEIGHT//2))
+        self.Position = pygame.Vector2(0,0)
+        self.Velocity = pygame.Vector2(0,0)
+        self.Acceleration = pygame.Vector2(0,0)
+        # self.X = 0.
+        # self.Y = 0.
+        # self.VelocityX, self.VelocityY = 0., 0.
+        # self.AccelerationX, self.AccelerationY = 0., 0.
         
-
         self.Mass = mass
         
-        self.VelocityX, self.VelocityY = 0., 0.
-        self.AccelerationX, self.AccelerationY = 0., 0.
-
         self.isStationary = stationary
 
         self.orbitLine = []
 
     def update(self, planets : pygame.sprite.Group):
-
-        totalAccelX = totalAccelY = 0
-        if not self.isStationary:
+        
+        totalAccel = pygame.Vector2(0,0)
+        #totalAccelX = 0
+        #totalAccelY = 0
+        if self.isStationary:
+            self.Velocity = pygame.Vector2(0,0)
+            #self.VelocityX = self.VelocityY = 0
+        else:
+             
             for planet in planets:
                 if self == planet:
-                        continue
-                ax, ay = self.attraction(body = planet)
-                totalAccelX += ax
-                totalAccelY += ay
+                    continue
+                a = self.attraction(body = planet)
+                totalAccel += a
+                #totalAccelX += ax
+                #totalAccelY += ay
             
-            self.VelocityX += -(totalAccelX * self.TIMESTEP)
-            self.VelocityY += -(totalAccelY * self.TIMESTEP)# * self.TIMESTEP)
+
+            self.Velocity += -totalAccel * self.TIMESTEP
+            self.Position += self.Velocity * self.TIMESTEP
             
-            self.X += self.VelocityX * self.TIMESTEP
-            self.Y += self.VelocityY * self.TIMESTEP
-        else:
-             self.VelocityX = self.VelocityY = 0
+
     
 
-        self.rect.center = (self.X + (self.WIDTH//2), -self.Y + (self.HEIGHT//2))
+        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
 
 
     def attraction(self, body):
-        angle= atan2(self.Y,self.X)
-        distance = sqrt((body.X - self.X)**2 + (body.Y - self.Y)**2)
+        angle= atan2(self.Position.y, self.Position.x)
+        #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
+        distance = (body.Position - self.Position).length()
 
         #gravitational accel
         accel = body.Mass/(distance**2)
 
+        
         accelX = cos(angle) * accel
         accelY = sin(angle) * accel
+        accel = pygame.Vector2(accelX, accelY)
 
-        return accelX, accelY
+        return accel
     
 
     # generates an orbit using 2-body physics
@@ -91,16 +101,17 @@ class Planet(pygame.sprite.Sprite):
         r = semiMajorAxis * ((1 - eccentricity**2)/ (1 + eccentricity*cos(radians(initialAnomaly))))
 
         SOI = 0.9431 * semiMajorAxis * (self.Mass/parent.Mass)**(2./5.)
-        print(SOI)
+        print("Sphere of influence of " + self.name + ": " + str(SOI))
           
         # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
-        self.X = parent.X + r*cos(radians(initialAnomaly + periapsisAngle))
-        self.Y = parent.Y + r*sin(radians(initialAnomaly + periapsisAngle))
+        self.Position.x = parent.Position.x + r*cos(radians(initialAnomaly + periapsisAngle))
+        self.Position.y = parent.Position.y + r*sin(radians(initialAnomaly + periapsisAngle))
 
         # determine velocity using vis-visa equation
-        velocity = sqrt(massConstant * ((2/r) - (1/semiMajorAxis)))
-        self.VelocityX = parent.VelocityX - velocity*sin(radians(initialAnomaly + periapsisAngle))
-        self.VelocityY = parent.VelocityY + velocity*cos(radians(initialAnomaly + periapsisAngle))
+        velocity = sqrt(massConstant * ((2./r) - (1./semiMajorAxis)))
+        self.Velocity.x = parent.Velocity.x - velocity*sin(radians(initialAnomaly + periapsisAngle))
+        self.Velocity.y = parent.Velocity.y + velocity*cos(radians(initialAnomaly + periapsisAngle))
+        
 
         
     # TODO collisions
