@@ -15,7 +15,7 @@ class Planet(pygame.sprite.Sprite):
         self.scene = scene
         self.WIDTH, self.HEIGHT = self.scene.simulation.screen.get_size()
 
-        self.TIMESTEP : float = self.scene.simulation.DELTATIME 
+        self.TIMESTEP : float = self.scene.simulation.DELTATIME
 
         self.Radius = radius
         self.Color = color
@@ -26,9 +26,9 @@ class Planet(pygame.sprite.Sprite):
         
         self.rect : pygame.FRect = self.image.get_frect()
         
-        self.Position = pygame.Vector2(0,0)
-        self.Velocity = pygame.Vector2(0,0)
-        self.Acceleration = pygame.Vector2(0,0)
+        self.Position : pygame.Vector2 = pygame.Vector2(0,0)
+        self.Velocity : pygame.Vector2 = pygame.Vector2(0,0)
+        self.Acceleration : pygame.Vector2 = pygame.Vector2(0,0)
         
         #self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
 
@@ -37,17 +37,16 @@ class Planet(pygame.sprite.Sprite):
         self.isStationary = stationary
 
         self.orbitLine = []
+        self.orbitLineLen : int = int(self.TIMESTEP) * 100
 
     def update(self, planets : pygame.sprite.Group):
         
-        totalAccel = pygame.Vector2(0,0)
-        #totalAccelX = 0
-        #totalAccelY = 0
+        
         if self.isStationary:
             self.Velocity = pygame.Vector2(0,0)
             #self.VelocityX = self.VelocityY = 0
         else:
-             
+            totalAccel = pygame.Vector2(0,0)
             for planet in planets:
                 if self == planet:
                     continue
@@ -62,7 +61,7 @@ class Planet(pygame.sprite.Sprite):
 
             # TODO 
             self.orbitLine.append(self.rect.center)
-            if len(self.orbitLine) > 50:
+            if len(self.orbitLine) > 300:
                 self.orbitLine.pop(0)
 
         self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
@@ -73,17 +72,15 @@ class Planet(pygame.sprite.Sprite):
 
 
     def attraction(self, body):
-        angle= atan2(self.Position.y, self.Position.x)
+        angle= atan2(self.Position.y - body.Position.y, self.Position.x - body.Position.x)
         #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
-        distance = (body.Position - self.Position).length()
+        distance = (self.Position - body.Position).length()
 
         #gravitational accel
-        accel = body.Mass/(distance**2)
+        accel = body.Mass/float(distance**2.)
 
-        
-        accelX = cos(angle) * accel
-        accelY = sin(angle) * accel
-        accel = pygame.Vector2(accelX, accelY)
+    
+        accel = pygame.Vector2(cos(angle) * accel, sin(angle) * accel)
 
         return accel
     
@@ -111,10 +108,12 @@ class Planet(pygame.sprite.Sprite):
         self.Position.x = parent.Position.x + r*cos(radians(initialAnomaly + periapsisAngle))
         self.Position.y = parent.Position.y + r*sin(radians(initialAnomaly + periapsisAngle))
 
+        print(parent.Position.x)
+
         # determine velocity using vis-visa equation
         velocity = sqrt(massConstant * ((2./r) - (1./semiMajorAxis)))
-        self.Velocity.x = parent.Velocity.x - velocity*sin(radians(initialAnomaly + periapsisAngle))
-        self.Velocity.y = parent.Velocity.y + velocity*cos(radians(initialAnomaly + periapsisAngle))
+        self.Velocity.x = parent.Velocity.x - velocity*sin(radians(initialAnomaly + periapsisAngle)) #+ velocity*cos(radians(initialAnomaly + periapsisAngle))
+        self.Velocity.y = parent.Velocity.y + velocity*cos(radians(initialAnomaly + periapsisAngle)) #+ velocity*sin(radians(initialAnomaly + periapsisAngle))
         
         self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
         self.orbitLine = [self.rect.center]
