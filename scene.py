@@ -16,8 +16,8 @@ class Scene():
         mars = Planet(self, mass = 1, color = 'red', radius = 4)
         
 
-        earth.set_orbit(sun, 0, 100, 100)
-        mars.set_orbit(sun, 180, 200, 200)
+        earth.set_orbit(sun, 0, 50, 200, periapsisAngle= 90)
+        mars.set_orbit(sun, 180, 200, 300)
 
         self.planetList.add(sun, earth, mars)
 

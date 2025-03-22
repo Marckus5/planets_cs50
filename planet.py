@@ -73,25 +73,28 @@ class Planet(pygame.sprite.Sprite):
         return accelX, accelY
     
     # TODO generates an orbit from parameters
-    def set_orbit(self, body, initialAnomaly : float, apoapsis : float, periapsis : float):
+    def set_orbit(self, body, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0):
+
+        massConstant = body.Mass # TODO implement the gravitation constant
 
         # semi-major and semi-minor axes
-        semiMajorAxis = (apoapsis + periapsis) / 2
-        semiMinorAxis = sqrt(apoapsis * periapsis)
+        semiMajorAxis = (apoapsis + periapsis) / 2 #a
+        semiMinorAxis = sqrt(apoapsis * periapsis) #b
         # eccentricity
         eccentricity = sqrt(1 - (semiMinorAxis**2/semiMajorAxis**2))
 
-        # TODO: determine orbital position
         r = semiMajorAxis * ((1 - eccentricity**2)/ (1 + eccentricity*cos(radians(initialAnomaly))))
-        
-        # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
-        self.X = r*cos(radians(initialAnomaly))
-        self.Y = r*sin(radians(initialAnomaly))
 
-        # determine velocity
-        velocity = sqrt(body.Mass/ r) # TODO implement the constants
-        self.VelocityX = velocity*sin(radians(initialAnomaly))
-        self.VelocityY = velocity*cos(radians(initialAnomaly))
+        # TODO: change periapsis location using periapsisAngle
+          
+        # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
+        self.X = r*cos(radians(initialAnomaly + periapsisAngle))
+        self.Y = r*sin(radians(initialAnomaly + periapsisAngle))
+
+        # determine velocity using vis-visa equation
+        velocity = sqrt(massConstant * (2 / r - 1/semiMajorAxis)) 
+        self.VelocityX = velocity*sin(radians(initialAnomaly + periapsisAngle))
+        self.VelocityY = velocity*cos(radians(initialAnomaly + periapsisAngle))
 
         
         
