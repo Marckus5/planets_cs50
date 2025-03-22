@@ -11,8 +11,8 @@ class Scene():
 
         self.planetList = pygame.sprite.Group()
 
-        sun = Planet(self, mass = 200, color = 'yellow', radius = 16)
-        earth = Planet(self, mass = 1, color = 'blue', radius = 16)
+        sun = Planet(self, mass = 200, color = 'yellow', radius = 16, stationary=True)
+        earth = Planet(self, mass = 1, color = 'blue', radius = 4)
         earth.X, earth.Y = 100, 100
         earth.VelocityX = 1
         earth.VelocityY = -1
