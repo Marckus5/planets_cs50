@@ -8,8 +8,5 @@ def main():
     simulation = Simulation(720, 620)
     simulation.run()
 
-
-
-
 if __name__ == "__main__":
     main()

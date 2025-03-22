@@ -11,8 +11,12 @@ class Scene():
 
         self.planetList = pygame.sprite.Group()
 
-        sun = Planet(self, mass = 1.98892e30, color = 'yellow', radius = 16, posx = 0, posy = 0)
-        earth = Planet(self, mass = 1.98892e30, color = 'blue', radius = 16, posx = 10, posy = 0)
+        sun = Planet(self, mass = 200, color = 'yellow', radius = 16)
+        earth = Planet(self, mass = 1, color = 'blue', radius = 16)
+        earth.X, earth.Y = 100, 100
+        earth.VelocityX = 1
+        earth.VelocityY = -1
+
         self.planetList.add(sun, earth)
 
 
@@ -23,6 +27,7 @@ class Scene():
         self.surface.fill('black')
         self.blit_screen()
 
+        
     def blit_screen(self): #NOTE always called last!!!
         self.planetList.draw(self.surface)
 

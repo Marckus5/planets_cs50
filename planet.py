@@ -10,7 +10,7 @@ class Planet(pygame.sprite.Sprite):
     SCALE : float = 50/AU
     TIMESTEP : float = 3600 * 24 *10
 
-    def __init__(self, scene, mass : float, color, radius : int, posx : float, posy : float, stationary : bool = False):
+    def __init__(self, scene, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
 
         self.scene = scene
@@ -22,9 +22,9 @@ class Planet(pygame.sprite.Sprite):
         
         self.rect : pygame.FRect = self.image.get_frect()
 
-        self.X = posx
-        self.Y = posy
-        self.rect.center = (self.X + (self.WIDTH//2), - self.Y + (self.HEIGHT//2))
+        self.X = 0
+        self.Y = 0
+        self.rect.center = (self.X + (self.WIDTH//2), -self.Y + (self.HEIGHT//2))
         self.Radius = radius
         self.Color = color
 
@@ -37,19 +37,37 @@ class Planet(pygame.sprite.Sprite):
 
         self.orbitLine = []
 
-    def draw(self, screen):
-        pass
+    def update(self, planets : pygame.sprite.Group):
 
-    def update(self, planets):
-
+        totalAccelX = totalAccelY = 0
         for planet in planets:
-            pass
+            if self == planet:
+                    continue
+            ax, ay = self.attraction(body = planet)
+            totalAccelX += ax
+            totalAccelY += ay
+        
+        self.VelocityX += -(totalAccelX)# * self.TIMESTEP)
+        self.VelocityY += -(totalAccelY)# * self.TIMESTEP)
+        
         self.X += self.VelocityX
-        
-        
-        
-        self.rect.center = (self.X + (self.WIDTH//2), - self.Y + (self.HEIGHT//2))
+        self.Y += self.VelocityY
+    
 
+        self.rect.center = (self.X + (self.WIDTH//2), -self.Y + (self.HEIGHT//2))
+
+
+    def attraction(self, body):
+        angle= atan2(self.Y,self.X)
+        distance = sqrt((body.X - self.X)**2 + (body.Y - self.Y)**2)
+
+        #gravitational accel
+        accel = body.Mass/(distance**2)
+
+        accelX = cos(angle) * accel
+        accelY = sin(angle) * accel
+
+        return accelX, accelY
 
 
     
