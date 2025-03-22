@@ -8,13 +8,14 @@ class Planet(pygame.sprite.Sprite):
     AU : float = 149.6e9
     G : float = 6.67428e-11
     SCALE : float = 50/AU
-    TIMESTEP : float = 3600 * 24 *10
+    
 
     def __init__(self, scene, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
-
         self.scene = scene
-        self.WIDTH, self.HEIGHT = self.scene.screen.get_size()
+        self.WIDTH, self.HEIGHT = self.scene.simulation.screen.get_size()
+
+        self.TIMESTEP : float = self.scene.simulation.DELTATIME 
 
         self.Radius = radius
         self.Color = color
@@ -23,15 +24,15 @@ class Planet(pygame.sprite.Sprite):
         
         self.rect : pygame.FRect = self.image.get_frect()
 
-        self.X = 0
-        self.Y = 0
+        self.X = 0.
+        self.Y = 0.
         self.rect.center = (self.X + (self.WIDTH//2), -self.Y + (self.HEIGHT//2))
         
 
         self.Mass = mass
         
-        self.VelocityX, self.VelocityY = 0, 0
-        self.AccelerationX, self.AccelerationY = 0, 0
+        self.VelocityX, self.VelocityY = 0., 0.
+        self.AccelerationX, self.AccelerationY = 0., 0.
 
         self.isStationary = stationary
 
@@ -48,11 +49,11 @@ class Planet(pygame.sprite.Sprite):
                 totalAccelX += ax
                 totalAccelY += ay
             
-            self.VelocityX += -(totalAccelX)
-            self.VelocityY += -(totalAccelY)# * self.TIMESTEP)
+            self.VelocityX += -(totalAccelX * self.TIMESTEP)
+            self.VelocityY += -(totalAccelY * self.TIMESTEP)# * self.TIMESTEP)
             
-            self.X += self.VelocityX
-            self.Y += self.VelocityY
+            self.X += self.VelocityX * self.TIMESTEP
+            self.Y += self.VelocityY * self.TIMESTEP
         else:
              self.VelocityX = self.VelocityY = 0
     
@@ -72,10 +73,14 @@ class Planet(pygame.sprite.Sprite):
 
         return accelX, accelY
     
-    # TODO generates an orbit from parameters
-    def set_orbit(self, body, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0):
 
-        massConstant = body.Mass # TODO implement the gravitation constant
+    # generates an orbit using 2-body physics
+    # parent: the parent body the object orbits
+    # initialAnomaly: the initial (true) anomaly--angle between periapsis and object position
+    # periapsisAngle: angle between periapsis position vector and +x-axis
+    def set_orbit(self, parent, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0):
+
+        massConstant = parent.Mass # TODO implement the gravitation constant
 
         # semi-major and semi-minor axes
         semiMajorAxis = (apoapsis + periapsis) / 2 #a
@@ -85,18 +90,20 @@ class Planet(pygame.sprite.Sprite):
 
         r = semiMajorAxis * ((1 - eccentricity**2)/ (1 + eccentricity*cos(radians(initialAnomaly))))
 
-        # TODO: change periapsis location using periapsisAngle
+        SOI = 0.9431 * semiMajorAxis * (self.Mass/parent.Mass)**(2./5.)
+        print(SOI)
           
         # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
-        self.X = r*cos(radians(initialAnomaly + periapsisAngle))
-        self.Y = r*sin(radians(initialAnomaly + periapsisAngle))
+        self.X = parent.X + r*cos(radians(initialAnomaly + periapsisAngle))
+        self.Y = parent.Y + r*sin(radians(initialAnomaly + periapsisAngle))
 
         # determine velocity using vis-visa equation
-        velocity = sqrt(massConstant * (2 / r - 1/semiMajorAxis)) 
-        self.VelocityX = velocity*sin(radians(initialAnomaly + periapsisAngle))
-        self.VelocityY = velocity*cos(radians(initialAnomaly + periapsisAngle))
+        velocity = sqrt(massConstant * ((2/r) - (1/semiMajorAxis)))
+        self.VelocityX = parent.VelocityX - velocity*sin(radians(initialAnomaly + periapsisAngle))
+        self.VelocityY = parent.VelocityY + velocity*cos(radians(initialAnomaly + periapsisAngle))
 
         
+    # TODO collisions
         
 
 

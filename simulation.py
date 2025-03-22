@@ -30,10 +30,10 @@ class Simulation():
 
     def run(self):
         self.FPS = 60
-        self.DELTATIME = 1/self.FPS
-        self.scene = Scene(self.screen, 0)
+        self.DELTATIME = 1/self.FPS #TODO implement delta-time
+        self.scene = Scene(self, 0)
         while self.running:
-            self.DELTATIME = self.clock.tick(self.FPS)/ 1000
+            self.DELTATIME = self.clock.tick(self.FPS)/ (1000*1000)
 
             self.check_events()
 
