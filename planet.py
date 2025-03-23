@@ -1,5 +1,5 @@
 import pygame
-from math import sin, cos, atan2, sqrt, cos, radians
+from math import sin, cos, atan2, sqrt, cos, radians, pi
 
 
 WHITE = (255,255,255)
@@ -8,7 +8,7 @@ class Planet(pygame.sprite.Sprite):
     AU : float = 149.6e9
     G : float = 6.67428e-11
     SCALE : float = 50/AU
-    TIMESCALE : float = 1
+    TIMESCALE : float = 0.05
 
     def __init__(self, scene, name: str, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
@@ -36,7 +36,7 @@ class Planet(pygame.sprite.Sprite):
         self.isStationary = stationary
 
         self.orbitLine = []
-        self.orbitLineLen : int = int(self.TIMESTEP) * 100
+        self.orbitLineLen : int = int(self.TIMESTEP * 10e+5)
 
     def update(self, planets : pygame.sprite.Group):
         
@@ -49,10 +49,7 @@ class Planet(pygame.sprite.Sprite):
             for planet in planets:
                 if self == planet:
                     continue
-                a = self.attraction(body = planet)
-                totalAccel += a
-                #totalAccelX += ax
-                #totalAccelY += ay
+                totalAccel += self.attraction(planet)
             
 
             self.Velocity += totalAccel * self.TIMESTEP
@@ -60,7 +57,7 @@ class Planet(pygame.sprite.Sprite):
 
             # TODO 
             self.orbitLine.append(self.rect.center)
-            if len(self.orbitLine) > 300:
+            if len(self.orbitLine) > self.orbitLineLen:
                 self.orbitLine.pop(0)
 
         self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
@@ -71,12 +68,12 @@ class Planet(pygame.sprite.Sprite):
 
 
     def attraction(self, body):
-        angle= atan2(body.Position.y - self.Position.y, body.Position.x - self.Position.x)
+        angle= atan2(self.Position.y - body.Position.y , self.Position.x - body.Position.x)
         #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
         distance = (self.Position - body.Position).length()
 
         #gravitational accel
-        accel = body.Mass/float(distance**2.)
+        accel = -body.Mass/float(distance**2.)
 
     
         accel = pygame.Vector2(cos(angle) * accel, sin(angle) * accel)
@@ -84,35 +81,59 @@ class Planet(pygame.sprite.Sprite):
         return accel
     
 
-    # generates an orbit using 2-body physics
-    # parent: the parent body the object orbits
-    # initialAnomaly: the initial (true) anomaly--angle between periapsis and object position
-    # periapsisAngle: angle between periapsis position vector and +x-axis
-    def set_orbit(self, parent, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0):
+    
+    def set_orbit(self, parent, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0, retrograde: bool = False):
+        """
+        Set planet's velocity for an orbit around a central mass. This assumes self.mass << parent.mass
+        
+        Parameters:
+            - parent: the parent body the object orbits
+            - initialAnomaly: the initial (true) anomaly--angle between periapsis and object position. In degrees
+            - periapsisAngle: angle between periapsis position vector and +x-axis
+        """
+
+        if periapsis > apoapsis:
+            tmp = periapsis
+            periapsis = apoapsis
+            apoapsis = tmp
+
+        trueAnomaly = radians(initialAnomaly)
 
         massConstant = parent.Mass # TODO implement the gravitation constant
 
-        # semi-major and semi-minor axes
-        semiMajorAxis = (apoapsis + periapsis) / 2. #a
-        semiMinorAxis = sqrt(apoapsis * periapsis) #b
-        # eccentricity
-        eccentricity = sqrt(1 - (semiMinorAxis**2/semiMajorAxis**2))
+        semiMajorAxis = (apoapsis + periapsis) / 2.
+        eccentricity = (apoapsis - periapsis)/(apoapsis + periapsis)
 
-        r = semiMajorAxis * ((1. - eccentricity**2.)/ (1 + eccentricity*cos(radians(initialAnomaly))))
+        r = semiMajorAxis * ((1. - eccentricity**2.)/ (1 + eccentricity*cos(trueAnomaly)))
 
-        SOI = 0.9431 * semiMajorAxis * (self.Mass/parent.Mass)**(2./5.)
-        print("Sphere of influence of " + self.name + ": " + str(SOI))
+        #SOI = 0.9431 * semiMajorAxis * (self.Mass/parent.Mass)**(2./5.)
+        #print("Sphere of influence of " + self.name + ": " + str(SOI))
           
-        # at initial (true) anomaly of 0, object is at periapsis (on the +x-axis)
-        self.Position.x = parent.Position.x + r*cos(radians(initialAnomaly + periapsisAngle))
-        self.Position.y = parent.Position.y + r*sin(radians(initialAnomaly + periapsisAngle))
+        # at initial (true) anomaly of 0, object is at periapsis
+        x = r*cos(trueAnomaly)
+        y = r*sin(trueAnomaly)
+        position = pygame.Vector2(x, y)
+        position.rotate_ip(periapsisAngle)
+        self.Position = parent.Position + position
 
-        print(parent.Position.x)
 
-        # determine velocity using vis-visa equation
-        velocity = sqrt(massConstant * ((2./r) - (1./semiMajorAxis)))
-        self.Velocity.x = parent.Velocity.x - velocity*sin(radians(initialAnomaly + periapsisAngle)) #+ velocity*cos(radians(initialAnomaly + periapsisAngle))
-        self.Velocity.y = parent.Velocity.y + velocity*cos(radians(initialAnomaly + periapsisAngle)) #+ velocity*sin(radians(initialAnomaly + periapsisAngle))
+        # determine magnitude of velocity using vis-viva equation
+        velocityMagnitude = sqrt(massConstant * ((2./r) - (1./semiMajorAxis)))
+
+        # angle between velocity vector and +x-axis
+        # BUG Orbit is still a bit off, but it's probably just due to precision error
+        flightPathAngle = -atan2((eccentricity*sin(trueAnomaly)),
+                                (1 + eccentricity*cos(trueAnomaly)))
+        flightPathAngle += pi/2. + trueAnomaly
+
+        velocity = pygame.Vector2(1,0).rotate_rad(flightPathAngle) * velocityMagnitude
+        velocity.rotate_ip(periapsisAngle)
+
+        self.Velocity = parent.Velocity + velocity
+
+        if retrograde:
+            self.Velocity *= -1
+
         
         self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
         self.orbitLine = [self.rect.center]
