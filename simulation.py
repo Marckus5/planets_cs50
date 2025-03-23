@@ -54,7 +54,7 @@ class Simulation():
         mButtonsHold = pygame.mouse.get_pressed()
         keys = pygame.key.get_pressed()
         
-        cameraPos = self.scene.cameraGroup.Pos
+        cameraPos = self.scene.planetList.Pos
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
