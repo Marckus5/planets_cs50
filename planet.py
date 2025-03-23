@@ -81,7 +81,7 @@ class Planet(pygame.sprite.Sprite):
         return accel
     
 
-    
+    # TODO: include open orbits where periapsis < 0
     def set_orbit(self, parent, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0, retrograde: bool = False):
         """
         Set planet's velocity for an orbit around a central mass. This assumes self.mass << parent.mass

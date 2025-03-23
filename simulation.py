@@ -49,10 +49,25 @@ class Simulation():
 
     def check_events(self):
         mPos = pygame.mouse.get_pos()
+        mButton = pygame.mouse.get_pressed()
+        keys = pygame.key.get_pressed()
+        cameraPos = self.scene.cameraGroup.Pos
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            
+        # TODO CAMERA CONTROLS
+        if keys[pygame.K_UP]:
+            cameraPos.y += 10
+        if keys[pygame.K_DOWN]:
+            cameraPos.y -= 10
+        if keys[pygame.K_RIGHT]:
+            cameraPos.x -= 10   
+        if keys[pygame.K_LEFT]:
+            cameraPos.x += 10
+                
+
 
 
 
