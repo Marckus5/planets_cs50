@@ -19,9 +19,9 @@ class Scene():
         sun.Velocity = pygame.Vector2(10,0)
         sun.Position.x = -100
         
-        earth.set_orbit(sun, 0, 200, 300, periapsisAngle= 90)
+        earth.set_orbit(sun, 0, 100, 90, periapsisAngle= 90)
         mars.set_orbit(sun, 45, 200, 300)
-        moon.set_orbit(earth, 0, 2, 2)
+        moon.set_orbit(earth, 0, 1, 1)
 
         # sun1 = Planet(self, name = "sun1", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
         # sun2 = Planet(self, name = "sun2", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
@@ -44,15 +44,21 @@ class Scene():
     def blit_screen(self): #NOTE always called last!!!
         self.planetList.draw(self.surface)
         self.draw_orbit()
+        #self.draw_velocity()
 
         self.simulation.screen.blit(self.surface,(0,0))
 
     def draw_orbit(self):
         for planet in self.planetList:
             # for stationary planets with no orbit lines
-            if not planet.orbitLine:
+            if len(planet.orbitLine) < 2:
                 continue
-            prevPoint = planet.orbitLine[0]
-            for point in planet.orbitLine:
-                pygame.draw.line(self.surface, planet.Color, point, prevPoint, 1)
-                prevPoint = point
+            pygame.draw.lines(self.surface, planet.Color, False, planet.orbitLine)
+
+
+    def draw_velocity(self):
+        for planet in self.planetList:
+            velocityVector = (planet.Velocity) * 0.1
+            velocityVector.x += 0.5*self.simulation.SCREENSIZE[0]
+            velocityVector.y = -velocityVector.y + 0.5*self.simulation.SCREENSIZE[1]
+            pygame.draw.line(self.surface, (255,255,255), (0,0), velocityVector, 1)

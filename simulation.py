@@ -10,7 +10,7 @@ class Simulation():
         self.running : bool = True
 
         self.SCREENSIZE = (windowWidth, windowHeight)
-        self.window : pygame.Surface = pygame.display.set_mode(self.SCREENSIZE, flags = pygame.RESIZABLE | pygame.SCALED)
+        self.window : pygame.Surface = pygame.display.set_mode(self.SCREENSIZE, flags = pygame.RESIZABLE | pygame.SCALED, vsync=1)
         self.window.fill('Gray')
         pygame.display.set_caption("pygame Test")
 
@@ -33,23 +33,23 @@ class Simulation():
         self.DELTATIME : float = 1/self.FPS #TODO implement delta-time
         self.scene = Scene(self, 0)
         while self.running:
-            self.DELTATIME : float = self.clock.tick(self.FPS)/ (1000.*1000)
+            
 
             self.check_events()
-
-            self.screen.fill((0,0,0))
             
             self.scene.run()
 
             self.window.blit(self.screen, (0,0))
             pygame.display.flip()
-            
+            self.DELTATIME : float = self.clock.tick(self.FPS)/ (1000)
 
         pygame.quit()
         sys.exit()
     
 
     def check_events(self):
+        mPos = pygame.mouse.get_pos()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

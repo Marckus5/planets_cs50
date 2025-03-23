@@ -8,14 +8,14 @@ class Planet(pygame.sprite.Sprite):
     AU : float = 149.6e9
     G : float = 6.67428e-11
     SCALE : float = 50/AU
-    
+    TIMESCALE : float = 1
 
     def __init__(self, scene, name: str, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
         self.scene = scene
-        self.WIDTH, self.HEIGHT = self.scene.simulation.screen.get_size()
+        self.WIDTH, self.HEIGHT = self.scene.simulation.SCREENSIZE
 
-        self.TIMESTEP : float = self.scene.simulation.DELTATIME
+        self.TIMESTEP : float = self.scene.simulation.DELTATIME * self.TIMESCALE
 
         self.Radius = radius
         self.Color = color
@@ -29,8 +29,7 @@ class Planet(pygame.sprite.Sprite):
         self.Position : pygame.Vector2 = pygame.Vector2(0,0)
         self.Velocity : pygame.Vector2 = pygame.Vector2(0,0)
         self.Acceleration : pygame.Vector2 = pygame.Vector2(0,0)
-        
-        #self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
 
         self.Mass = mass
         
@@ -56,7 +55,7 @@ class Planet(pygame.sprite.Sprite):
                 #totalAccelY += ay
             
 
-            self.Velocity += -totalAccel * self.TIMESTEP
+            self.Velocity += totalAccel * self.TIMESTEP
             self.Position += self.Velocity * self.TIMESTEP
 
             # TODO 
@@ -72,7 +71,7 @@ class Planet(pygame.sprite.Sprite):
 
 
     def attraction(self, body):
-        angle= atan2(self.Position.y - body.Position.y, self.Position.x - body.Position.x)
+        angle= atan2(body.Position.y - self.Position.y, body.Position.x - self.Position.x)
         #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
         distance = (self.Position - body.Position).length()
 
@@ -94,12 +93,12 @@ class Planet(pygame.sprite.Sprite):
         massConstant = parent.Mass # TODO implement the gravitation constant
 
         # semi-major and semi-minor axes
-        semiMajorAxis = (apoapsis + periapsis) / 2 #a
+        semiMajorAxis = (apoapsis + periapsis) / 2. #a
         semiMinorAxis = sqrt(apoapsis * periapsis) #b
         # eccentricity
         eccentricity = sqrt(1 - (semiMinorAxis**2/semiMajorAxis**2))
 
-        r = semiMajorAxis * ((1 - eccentricity**2)/ (1 + eccentricity*cos(radians(initialAnomaly))))
+        r = semiMajorAxis * ((1. - eccentricity**2.)/ (1 + eccentricity*cos(radians(initialAnomaly))))
 
         SOI = 0.9431 * semiMajorAxis * (self.Mass/parent.Mass)**(2./5.)
         print("Sphere of influence of " + self.name + ": " + str(SOI))
