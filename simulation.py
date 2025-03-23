@@ -49,8 +49,11 @@ class Simulation():
 
     def check_events(self):
         mPos = pygame.mouse.get_pos()
-        mButton = pygame.mouse.get_pressed()
+        mDragPos = pygame.mouse.get_rel()
+
+        mButtonsHold = pygame.mouse.get_pressed()
         keys = pygame.key.get_pressed()
+        
         cameraPos = self.scene.cameraGroup.Pos
 
         for event in pygame.event.get():
@@ -66,6 +69,11 @@ class Simulation():
             cameraPos.x -= 10   
         if keys[pygame.K_LEFT]:
             cameraPos.x += 10
+        
+        elif mButtonsHold[2]:
+            cameraPos += mDragPos
+
+        
                 
 
 
