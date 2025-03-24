@@ -4,22 +4,25 @@ from planet import Planet
 # TODO: camera controls: right click: drag move camera; mouse wheel: zoom
 # 
 class Scene():
+    
     def __init__(self, simulation, state : int):
         self.simulation = simulation
         self.state = state
 
+        #self.SCENESIZE = self.simulation.screen.get_size()
+        self.SCENESIZE = (720,720)
+        self.surface = pygame.Surface(self.SCENESIZE).convert()
 
-        self.surface = pygame.Surface(self.simulation.screen.get_size()).convert()
+        self.zoom : float = 1.0
+        
 
         self.planetList = CameraGroup(self)
+        self.planetSelect = pygame.sprite.GroupSingle()
 
-        sun = Planet(self, name = "sun", mass = 10e+8, color = 'yellow', radius = 16, stationary=False)
+        sun = Planet(self, name = "sun", mass = 10e+5, color = 'yellow', radius = 16, stationary=False)
         earth = Planet(self, name = "earth", mass = 10, color = 'blue', radius = 4)
         moon = Planet(self, name = "moon", mass = 0, color = 'grey', radius = 2)
         mars = Planet(self, name = "mars", mass = 0, color = 'red', radius = 4)
-
-        #sun.Velocity = pygame.Vector2(100,0)
-        #sun.Position.x = -100
         
         earth.set_orbit(sun, 0, 200, 50, periapsisAngle=0, retrograde=False)
         mars.set_orbit(sun, 0, 100, 200)
@@ -70,27 +73,31 @@ class CameraGroup(pygame.sprite.Group):
     def __init__(self, scene):
         super().__init__()
 
-        self.Pos = pygame.Vector2(100,0)
+        self.Pos = pygame.Vector2(0,0)
+        self.scene = scene
+        self.rect : pygame.Rect = self.scene.surface.get_rect()
+        self.rect.center = (0,0)
 
-        self.rect = scene.surface.get_rect()
+        
 
 
 
     def draw(self, surface : pygame.Surface):
         for sprite in self.sprites():
             offsetPos = sprite.rect.topleft + self.Pos
+            # Redraw sprite image for zoom
+            #sprite.Radius *= self.scene.zoom
+            #sprite.image.fill((0,0,0))
+            #pygame.draw.circle(sprite.image, sprite.Color, (sprite.Radius, sprite.Radius), sprite.Radius)
+
             surface.blit(sprite.image, offsetPos)
             self.draw_orbit(surface, sprite)
 
-
-    # TODO update group, add or remove
-    def updateGroup(self, planetList: pygame.sprite.Group):
-        pass
 
     def draw_orbit(self, surface, planet):
         # for stationary planets with no orbit lines
         if len(planet.orbitLine) < 2:
             return
         offsetPos = [tuple(map(lambda a,b : a + b, point, self.Pos)) for point in planet.orbitLine]
-        #print(offsetPos)
+        
         pygame.draw.lines(surface, planet.Color, False, offsetPos)

@@ -5,6 +5,7 @@ from menu import *
 from scene import *
 
 class Simulation():
+    
     def __init__(self, windowWidth : int, windowHeight : int):
         pygame.init()
         self.running : bool = True
@@ -16,7 +17,7 @@ class Simulation():
 
 
 
-        self.screen = pygame.Surface(self.SCREENSIZE)        
+        self.screen = pygame.Surface(self.SCREENSIZE)
 
         self.clock = pygame.time.Clock()
 
@@ -33,12 +34,10 @@ class Simulation():
         self.DELTATIME : float = 1/self.FPS #TODO implement delta-time
         self.scene = Scene(self, 0)
         while self.running:
-            
-
+            self.screen.fill('#a0a0a0')
             self.check_events()
-            
             self.scene.run()
-
+            
             self.window.blit(self.screen, (0,0))
             pygame.display.flip()
             self.DELTATIME : float = self.clock.tick(self.FPS)/ (1000)
@@ -48,10 +47,11 @@ class Simulation():
     
 
     def check_events(self):
-        mPos = pygame.mouse.get_pos()
-        mDragPos = pygame.mouse.get_rel()
+        mPos = pygame.Vector2(pygame.mouse.get_pos())
+        mDragPos = pygame.Vector2(pygame.mouse.get_rel())
 
         mButtonsHold = pygame.mouse.get_pressed()
+        mButtonsPress = pygame.mouse.get_just_pressed()
         keys = pygame.key.get_pressed()
         
         cameraPos = self.scene.planetList.Pos
@@ -60,7 +60,7 @@ class Simulation():
             if event.type == pygame.QUIT:
                 self.running = False
             
-        # TODO CAMERA CONTROLS
+        # CAMERA CONTROLS
         if keys[pygame.K_UP]:
             cameraPos.y += 10
         if keys[pygame.K_DOWN]:
@@ -69,9 +69,29 @@ class Simulation():
             cameraPos.x -= 10   
         if keys[pygame.K_LEFT]:
             cameraPos.x += 10
-        
-        elif mButtonsHold[2]:
+        if mButtonsHold[2]:
             cameraPos += mDragPos
+        
+        # TODO ZOOM
+        zoomTick = 0.01
+        if keys[pygame.K_1]:
+            if self.scene.zoom > zoomTick:
+                self.scene.zoom -= zoomTick
+            else:
+                self.scene.zoom = zoomTick
+        if keys[pygame.K_2]:
+            self.scene.zoom += 0.01
+
+        # TODO CHANGE TIMESCALE
+        
+        if mButtonsPress[0]:
+            # TODO Select Planet
+            for planet in self.scene.planetList:
+                planetOffsetRect : pygame.Rect = planet.rect.copy()
+                planetOffsetRect.topleft += cameraPos
+                planetOffsetRect.scale_by_ip(2)
+                if planetOffsetRect.collidepoint(mPos):
+                    print("Selected: " + planet.name)
 
         
                 
