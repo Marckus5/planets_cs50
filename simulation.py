@@ -67,10 +67,10 @@ class Simulation():
                 self.running = False
             if event.type == pygame.MOUSEWHEEL:
                 self.scene.planetList.zoom += event.y * 0.03
-            if self.scene.planetList.zoom < 0.7:
-                self.scene.planetList.zoom = 0.7
-            elif self.scene.planetList.zoom > 1.5:
-                self.scene.planetList.zoom = 1.5
+        if self.scene.planetList.zoom < 0.7:
+            self.scene.planetList.zoom = 0.7
+        elif self.scene.planetList.zoom > 1.5:
+            self.scene.planetList.zoom = 1.5
         # CAMERA CONTROLS
         if keys[pygame.K_UP]:
             cameraPos.y += 10 / self.scene.planetList.zoom
