@@ -35,11 +35,14 @@ class Simulation():
         self.scene = Scene(self, 0)
         while self.running:
             self.screen.fill('#a0a0a0')
-            self.check_events()
             self.scene.run()
-            
             self.window.blit(self.screen, (0,0))
-            pygame.display.flip()
+            pygame.display.update(self.screen)
+
+            self.check_events()
+
+
+
             self.DELTATIME : float = self.clock.tick(self.FPS)/ (1000)
 
         pygame.quit()
@@ -59,6 +62,15 @@ class Simulation():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            # BUG zoom limit is 'bouncy'
+            if event.type == pygame.MOUSEWHEEL:
+                if self.scene.planetList.zoom < 0.3:
+                    self.scene.planetList.zoom = 0.3
+                elif self.scene.planetList.zoom > 1.5:
+                    self.scene.planetList.zoom = 1.5
+                else:
+                    self.scene.planetList.zoom -= event.y * 0.03
+                print(self.scene.planetList.zoom)
             
         # CAMERA CONTROLS
         if keys[pygame.K_UP]:
@@ -76,11 +88,11 @@ class Simulation():
         zoomTick = 0.01
         if keys[pygame.K_1]:
             if self.scene.zoom > zoomTick:
-                self.scene.zoom -= zoomTick
+                self.scene.planetList.zoom -= zoomTick
             else:
-                self.scene.zoom = zoomTick
+                self.scene.planetList.zoom = zoomTick
         if keys[pygame.K_2]:
-            self.scene.zoom += 0.01
+            self.scene.planetList.zoom += 0.01
 
         # TODO CHANGE TIMESCALE
         

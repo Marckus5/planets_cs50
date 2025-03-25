@@ -10,16 +10,13 @@ class Scene():
         self.state = state
 
         #self.SCENESIZE = self.simulation.screen.get_size()
-        self.SCENESIZE = (720,720)
-        self.surface = pygame.Surface(self.SCENESIZE).convert()
-
-        self.zoom : float = 1.0
-        
+        self.SCENESIZE : tuple = (720,720)
+        self.surface = pygame.Surface(self.SCENESIZE).convert()        
 
         self.planetList = CameraGroup(self)
         self.planetSelect = pygame.sprite.GroupSingle()
 
-        sun = Planet(self, name = "sun", mass = 10e+5, color = 'yellow', radius = 16, stationary=False)
+        sun = Planet(self, name = "sun", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
         earth = Planet(self, name = "earth", mass = 10, color = 'blue', radius = 4)
         moon = Planet(self, name = "moon", mass = 0, color = 'grey', radius = 2)
         mars = Planet(self, name = "mars", mass = 0, color = 'red', radius = 4)
@@ -43,19 +40,11 @@ class Scene():
         self.surface.fill('black')
         self.blit_screen()
 
-        #print(self.planetList)
-        for planet in self.planetList:
-            #print(planet.name + ": " + f"{planet.Position.x}, " + f"{planet.Position.y}")
-            if planet.name == "earth":
-                #print(planet.Position.length())
-                pass
-
         
     def blit_screen(self): #NOTE always called last!!!
-        #self.planetList.draw(self.surface)
         self.planetList.draw(self.surface)
-        
 
+        
         self.simulation.screen.blit(self.surface,(0,0))
 
     
@@ -75,29 +64,37 @@ class CameraGroup(pygame.sprite.Group):
 
         self.Pos = pygame.Vector2(0,0)
         self.scene = scene
-        self.rect : pygame.Rect = self.scene.surface.get_rect()
-        self.rect.center = (0,0)
 
-        
+        self.HALFSIZE = (self.scene.SCENESIZE[0]//2, self.scene.SCENESIZE[1]//2)
+
+        self.zoom : float = 1.0
+        self.displaySurfaceSize = pygame.Vector2(0xdff, 0xdff)
+        self.displaySurface : pygame.Surface = pygame.Surface(self.displaySurfaceSize, pygame.SRCALPHA)
+        self.displayRect : pygame.FRect = self.displaySurface.get_frect(center = self.HALFSIZE)
+        self.displayOffset = self.displaySurfaceSize // 2 - self.HALFSIZE
 
 
 
     def draw(self, surface : pygame.Surface):
-        for sprite in self.sprites():
-            offsetPos = sprite.rect.topleft + self.Pos
-            # Redraw sprite image for zoom
-            #sprite.Radius *= self.scene.zoom
-            #sprite.image.fill((0,0,0))
-            #pygame.draw.circle(sprite.image, sprite.Color, (sprite.Radius, sprite.Radius), sprite.Radius)
+        self.displaySurface.fill('grey')
 
-            surface.blit(sprite.image, offsetPos)
-            self.draw_orbit(surface, sprite)
+        for sprite in self.sprites():
+            offsetPos = sprite.rect.topleft + self.Pos + self.displayOffset
+
+            self.displaySurface.blit(sprite.image, offsetPos)
+            self.draw_orbit(self.displaySurface, sprite)
+
+
+        scaledSurface = pygame.transform.scale(self.displaySurface, self.displaySurfaceSize*self.zoom)
+        scaledRect = scaledSurface.get_rect(center = self.HALFSIZE)
+        surface.blit(scaledSurface, scaledRect)
 
 
     def draw_orbit(self, surface, planet):
         # for stationary planets with no orbit lines
         if len(planet.orbitLine) < 2:
             return
-        offsetPos = [tuple(map(lambda a,b : a + b, point, self.Pos)) for point in planet.orbitLine]
+        #offsetPos = [tuple(map(lambda a,b : a + b, point, self.Pos)) for point in planet.orbitLine]
+        offsetPos = [point + self.Pos + self.displayOffset for point in planet.orbitLine]
         
         pygame.draw.lines(surface, planet.Color, False, offsetPos)

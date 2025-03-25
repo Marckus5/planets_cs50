@@ -30,7 +30,7 @@ class Planet(pygame.sprite.Sprite):
         self.Position : pygame.Vector2 = pygame.Vector2(0,0)
         self.Velocity : pygame.Vector2 = pygame.Vector2(0,0)
         self.Acceleration : pygame.Vector2 = pygame.Vector2(0,0)
-        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+        self.rect.center = (self.Position.x + (self.WIDTH//2), -self.Position.y + (self.HEIGHT//2))
 
         self.Mass = mass
         
@@ -54,11 +54,11 @@ class Planet(pygame.sprite.Sprite):
             self.Position += self.Velocity * self.TIMESTEP
 
             # TODO 
-            self.orbitLine.append(self.rect.center)
+            self.orbitLine.append(pygame.Vector2(self.rect.center))
             if len(self.orbitLine) > self.orbitLineLen:
                 self.orbitLine.pop(0)
 
-        self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
+        self.rect.center = (self.Position.x + (self.WIDTH//2), -self.Position.y + (self.HEIGHT//2))
 
     def attraction(self, body):
         angle= atan2(self.Position.y - body.Position.y , self.Position.x - body.Position.x)
@@ -84,7 +84,7 @@ class Planet(pygame.sprite.Sprite):
             - initialAnomaly: the initial (true) anomaly--angle between periapsis and object position. In degrees
             - periapsisAngle: angle between periapsis position vector and +x-axis
         """
-
+        # swapping
         if periapsis > apoapsis:
             tmp = periapsis
             periapsis = apoapsis
@@ -117,7 +117,7 @@ class Planet(pygame.sprite.Sprite):
         # BUG Orbit is still a bit off, but it's probably just due to precision error
         flightPathAngle = -atan2((eccentricity*sin(trueAnomaly)),
                                 (1 + eccentricity*cos(trueAnomaly)))
-        flightPathAngle += pi/2. + trueAnomaly
+        flightPathAngle += 0.5*pi + trueAnomaly
 
         velocity = pygame.Vector2(1,0).rotate_rad(flightPathAngle) * velocityMagnitude
         velocity.rotate_ip(periapsisAngle)
@@ -129,7 +129,7 @@ class Planet(pygame.sprite.Sprite):
 
         
         self.rect.center = (self.Position.x + (self.WIDTH/2), -self.Position.y + (self.HEIGHT/2))
-        self.orbitLine = [self.rect.center]
+        self.orbitLine = [pygame.Vector2(self.rect.center)]
 
         
     # TODO collisions
