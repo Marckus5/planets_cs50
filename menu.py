@@ -2,12 +2,12 @@ import pygame
 
 
 class Menu():
-    def __init__(self,display : pygame.Surface, state : int):
-        self.display = display
-        self.state = state
+    def __init__(self,simulation : pygame.Surface, state : int):
+        self.simulation = simulation
+        self.state = state # TODO use for tabs
 
-
-        self.surface = pygame.Surface(self.game.screenSize).convert()
+        self.SIZE: tuple = (self.simulation.SCREENSIZE[0] * 0.25, self.simulation.SCREENSIZE[1])
+        self.surface = pygame.Surface(self.simulation.SCREENSIZE).convert()
         self.cursorRect = pygame.Rect(0,0,20,20)
 
         self.menuList = []
@@ -16,7 +16,10 @@ class Menu():
 
 
     def run(self):
-        self.surface.fill('red')
+        self.surface.fill('blue')
+
+        self.blit_screen()
+
 
     def draw_cursor(self):
         
@@ -31,8 +34,6 @@ class Menu():
         for button in self.menuList:
             button.draw()
 
-        
-        self.game.window.blit(self.surface,(0,0))
-        pygame.display.flip()
+        self.simulation.screen.blit(self.surface, (self.simulation.SCREENSIZE[0]*0.75,0))
 
     

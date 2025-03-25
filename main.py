@@ -5,7 +5,7 @@ from simulation import *
 
 def main():
 
-    simulation = Simulation(1280, 720)
+    simulation = Simulation(1600, 900)
     simulation.run()
 
 if __name__ == "__main__":

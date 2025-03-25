@@ -14,7 +14,7 @@ class Planet(pygame.sprite.Sprite):
     def __init__(self, scene, name: str, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
         self.scene = scene
-        self.WIDTH, self.HEIGHT = self.scene.SCENESIZE
+        self.WIDTH, self.HEIGHT = self.scene.SIZE
 
         self.TIMESTEP : float = self.scene.simulation.DELTATIME * self.TIMESCALE
 

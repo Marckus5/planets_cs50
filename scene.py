@@ -10,8 +10,8 @@ class Scene():
         self.state = state
 
         #self.SCENESIZE = self.simulation.screen.get_size()
-        self.SCENESIZE : tuple = (720,720)
-        self.surface = pygame.Surface(self.SCENESIZE).convert()        
+        self.SIZE : tuple = (self.simulation.SCREENSIZE[0] * 0.75, self.simulation.SCREENSIZE[1])
+        self.surface = pygame.Surface(self.SIZE).convert()        
 
         self.planetList = CameraGroup(self)
         self.planetSelect = pygame.sprite.GroupSingle()
@@ -65,10 +65,13 @@ class CameraGroup(pygame.sprite.Group):
         self.Pos = pygame.Vector2(0,0)
         self.scene = scene
 
-        self.HALFSIZE = (self.scene.SCENESIZE[0]//2, self.scene.SCENESIZE[1]//2)
+        self.HALFSIZE = (self.scene.SIZE[0]//2, self.scene.SIZE[1]//2)
 
         self.zoom : float = 1.0
-        self.displaySurfaceSize = pygame.Vector2(0xdff, 0xdff)
+        self.displaySurfaceSizeMax = pygame.Vector2(0x9ff, 0x7ff)
+        self.displaySurfaceSizeMin = pygame.Vector2(0x1ff, 0x1ff)
+
+        self.displaySurfaceSize = pygame.Vector2(0x7ff, 0x5ff)
         self.displaySurface : pygame.Surface = pygame.Surface(self.displaySurfaceSize, pygame.SRCALPHA)
         self.displayRect : pygame.FRect = self.displaySurface.get_frect(center = self.HALFSIZE)
         self.displayOffset = self.displaySurfaceSize // 2 - self.HALFSIZE
@@ -76,7 +79,7 @@ class CameraGroup(pygame.sprite.Group):
 
 
     def draw(self, surface : pygame.Surface):
-        self.displaySurface.fill('grey')
+        self.displaySurface.fill('#000020')
 
         for sprite in self.sprites():
             offsetPos = sprite.rect.topleft + self.Pos + self.displayOffset
@@ -84,6 +87,8 @@ class CameraGroup(pygame.sprite.Group):
             self.displaySurface.blit(sprite.image, offsetPos)
             self.draw_orbit(self.displaySurface, sprite)
 
+        # BUG this camera zoom consumes too much memory
+        # Maybe I can dynamically change the display surface size? Limit zoom distance for now
 
         scaledSurface = pygame.transform.scale(self.displaySurface, self.displaySurfaceSize*self.zoom)
         scaledRect = scaledSurface.get_rect(center = self.HALFSIZE)
@@ -97,4 +102,4 @@ class CameraGroup(pygame.sprite.Group):
         #offsetPos = [tuple(map(lambda a,b : a + b, point, self.Pos)) for point in planet.orbitLine]
         offsetPos = [point + self.Pos + self.displayOffset for point in planet.orbitLine]
         
-        pygame.draw.lines(surface, planet.Color, False, offsetPos)
+        pygame.draw.lines(surface, planet.Color, False, offsetPos, width = int(2/self.zoom))
