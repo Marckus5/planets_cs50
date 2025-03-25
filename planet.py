@@ -5,7 +5,7 @@ from math import sin, cos, atan2, sqrt, cos, radians, pi
 WHITE = (255,255,255)
 
 class Planet(pygame.sprite.Sprite):
-    TIMESCALE : float = 0.05
+    
     AU : float = 149.6e9
     G : float = 6.67428e-11
     SCALE : float = 50/AU
@@ -15,8 +15,6 @@ class Planet(pygame.sprite.Sprite):
         super().__init__()
         self.scene = scene
         self.WIDTH, self.HEIGHT = self.scene.SIZE
-
-        self.TIMESTEP : float = self.scene.simulation.DELTATIME * self.TIMESCALE
 
         self.Radius = radius
         self.Color = color
@@ -37,7 +35,7 @@ class Planet(pygame.sprite.Sprite):
         self.isStationary = stationary
 
         self.orbitLine = []
-        self.orbitLineLen : int = int(self.TIMESTEP * 10e+5)
+        self.orbitLineLen : int = 500
 
     def update(self, planets : pygame.sprite.Group):
         if self.isStationary:
@@ -50,8 +48,8 @@ class Planet(pygame.sprite.Sprite):
                 totalAccel += self.attraction(planet)
             
 
-            self.Velocity += totalAccel * self.TIMESTEP
-            self.Position += self.Velocity * self.TIMESTEP
+            self.Velocity += totalAccel * self.scene.TIMESTEP
+            self.Position += self.Velocity * self.scene.TIMESTEP
 
             # TODO 
             self.orbitLine.append(pygame.Vector2(self.rect.center))
@@ -59,6 +57,8 @@ class Planet(pygame.sprite.Sprite):
                 self.orbitLine.pop(0)
 
         self.rect.center = (self.Position.x + (self.WIDTH//2), -self.Position.y + (self.HEIGHT//2))
+
+        
 
     def attraction(self, body):
         angle= atan2(self.Position.y - body.Position.y , self.Position.x - body.Position.x)

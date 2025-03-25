@@ -13,6 +13,8 @@ class Scene():
         self.SIZE : tuple = (self.simulation.SCREENSIZE[0] * 0.75, self.simulation.SCREENSIZE[1])
         self.surface = pygame.Surface(self.SIZE).convert()        
 
+        self.TIMESTEP : float = 0.1 * self.simulation.DELTATIME * self.simulation.TIMESCALE
+
         self.planetList = CameraGroup(self)
         self.planetSelect = pygame.sprite.GroupSingle()
 
@@ -30,7 +32,7 @@ class Scene():
         sun2.set_orbit(sun1, 0, 100, 100)
 
 
-        self.planetList.add(sun, earth)
+        self.planetList.add(sun1, sun2)
 
 
     def run(self):

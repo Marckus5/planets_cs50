@@ -5,7 +5,7 @@ from menu import *
 from scene import *
 
 class Simulation():
-    
+    TIMESCALE : float = 0.05
     def __init__(self, windowWidth : int, windowHeight : int):
         pygame.init()
         self.running : bool = True
@@ -15,12 +15,10 @@ class Simulation():
         self.window.fill('Gray')
         pygame.display.set_caption("pygame Test")
 
-
-
+        self.selectedPlanet = None
         self.screen = pygame.Surface(self.SCREENSIZE)
 
         self.clock = pygame.time.Clock()
-
         # font
         self.font = pygame.font.get_default_font()
         
@@ -67,10 +65,26 @@ class Simulation():
                 self.running = False
             if event.type == pygame.MOUSEWHEEL:
                 self.scene.planetList.zoom += event.y * 0.03
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_PERIOD:
+                    self.TIMESCALE += 0.25
+                elif event.key == pygame.K_COMMA:
+                    self.TIMESCALE -= 0.25
+                
+
+
+        if self.TIMESCALE < 0.5:
+            self.TIMESCALE = 0.5
+        elif self.TIMESCALE > 5.0:
+            self.TIMESCALE = 4.0
+        else:
+            self.scene.TIMESTEP = 0.1 * self.DELTATIME * self.TIMESCALE
+    
         if self.scene.planetList.zoom < 0.7:
             self.scene.planetList.zoom = 0.7
         elif self.scene.planetList.zoom > 1.5:
             self.scene.planetList.zoom = 1.5
+
         # CAMERA CONTROLS
         if keys[pygame.K_UP]:
             cameraPos.y += 10 / self.scene.planetList.zoom
@@ -89,9 +103,12 @@ class Simulation():
             for planet in self.scene.planetList:
                 planetOffsetRect : pygame.Rect = planet.rect.copy()
                 planetOffsetRect.topleft += cameraPos
-                planetOffsetRect.scale_by_ip(4)
+                planetOffsetRect.scale_by_ip(2)
                 if planetOffsetRect.collidepoint(mPos):
+                    self.selectedPlanet = planet
                     print("Selected: " + planet.name)
+                elif self.selectedPlanet:
+                    self.selectedPlanet = None # Deselect
 
         
                 
