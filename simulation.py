@@ -20,7 +20,7 @@ class Simulation():
 
         self.clock = pygame.time.Clock()
         # font
-        self.font = pygame.font.get_default_font()
+        self.defaultFont = pygame.Font(pygame.font.get_default_font())
         
 
     def run(self):
@@ -99,17 +99,26 @@ class Simulation():
         # TODO CHANGE TIMESCALE
         
         if mButtonsPress[0]:
-            # TODO Select Planet
-            for planet in self.scene.planetList:
-                planetOffsetRect : pygame.Rect = planet.rect.copy()
-                planetOffsetRect.topleft += cameraPos
-                planetOffsetRect.scale_by_ip(2)
-                if planetOffsetRect.collidepoint(mPos):
-                    self.selectedPlanet = planet
-                    print("Selected: " + planet.name)
-                elif self.selectedPlanet:
-                    self.selectedPlanet = None # Deselect
+            # TODO Select Menu
+            if self.menu.rect.collidepoint(mPos):
+                for button in self.menu.menuList.sprites():
+                    offsetButtonPos : pygame.Vector2 = pygame.Vector2(button.rect.topleft) + pygame.Vector2(self.menu.rect.topleft)
 
+                    # TODO menu options
+                    if pygame.Rect(offsetButtonPos, button.rect.size).collidepoint(mPos):
+                        if button.id == 'test':
+                            print("Press: " + button.id)
+            # TODO Select Planet
+            elif self.scene.rect.collidepoint(mPos):
+                for planet in self.scene.planetList.sprites():
+                    planetOffsetRect : pygame.Rect = planet.rect.copy()
+                    planetOffsetRect.topleft += cameraPos
+                    planetOffsetRect.scale_by_ip(2)
+                    if planetOffsetRect.collidepoint(mPos):
+                        self.selectedPlanet = planet
+                        print("Selected: " + planet.name)
+                    elif self.selectedPlanet:
+                        self.selectedPlanet = None # Deselect
         
                 
 

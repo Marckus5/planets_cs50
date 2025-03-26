@@ -19,7 +19,8 @@ class Planet(pygame.sprite.Sprite):
         self.Radius = radius
         self.Color = color
         self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, color, (radius, radius), radius)
+        #pygame.draw.circle(self.image, color, (radius, radius), radius)
+        pygame.draw.aacircle(self.image, color, (radius, radius), radius)
 
         self.name = name
         
@@ -65,16 +66,14 @@ class Planet(pygame.sprite.Sprite):
         #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
         distance = (self.Position - body.Position).length()
 
-        #gravitational accel
-        accel = -body.Mass/float(distance**2.)
-
-    
-        accel = pygame.Vector2(cos(angle) * accel, sin(angle) * accel)
+        #gravitational accel    
+        accel = -body.Mass/float(distance**2.)*pygame.Vector2(cos(angle), sin(angle))
 
         return accel
     
 
     # TODO: include open orbits where periapsis < 0
+    # TODO: Include barycenter orbits
     def set_orbit(self, parent, initialAnomaly : float, apoapsis : float, periapsis : float, periapsisAngle: float = 0, retrograde: bool = False):
         """
         Set planet's velocity for an orbit around a central mass. This assumes self.mass << parent.mass
