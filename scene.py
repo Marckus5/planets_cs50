@@ -49,7 +49,7 @@ class Scene():
     def blit_screen(self): #NOTE always called last!!!
         self.planetList.draw(self.surface)
 
-        pygame.draw.rect(self.surface, 'red', self.rect, width=1)
+        pygame.draw.rect(self.surface, 'grey', self.rect, width=1)
         self.simulation.screen.blit(self.surface,(0,0))
         
 
@@ -96,10 +96,9 @@ class CameraGroup(pygame.sprite.Group):
         # for stationary planets with no orbit lines
         if len(planet.orbitLine) < 2:
             return
-        #offsetPos = [tuple(map(lambda a,b : a + b, point, self.Pos)) for point in planet.orbitLine]
+
         offsetPos = [point + self.Pos + self.displayOffset for point in planet.orbitLine]
         
-        #pygame.draw.lines(surface, planet.Color, False, offsetPos, width = int(2/self.zoom))
         pygame.draw.aalines(surface, planet.Color, False, offsetPos)
 
     def draw_velocity(self):

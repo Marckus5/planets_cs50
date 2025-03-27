@@ -28,6 +28,9 @@ class Simulation():
         self.DELTATIME : float = 1/self.FPS #TODO implement delta-time
         self.scene = Scene(self, 0)
         self.menu = Menu(self, 0)
+
+        self.selectedPlanet = self.scene.planetSelect
+
         while self.running:
             self.screen.fill('#a0a0a0')
 
@@ -102,7 +105,7 @@ class Simulation():
             # TODO Select Menu
             if self.menu.rect.collidepoint(mPos):
                 for button in self.menu.menuList.sprites():
-                    offsetButtonPos : pygame.Vector2 = pygame.Vector2(button.rect.topleft) + pygame.Vector2(self.menu.rect.topleft)
+                    offsetButtonPos : pygame.Vector2 = pygame.Vector2(button.rect.topleft) + pygame.Vector2(self.menu.rect.topleft) + pygame.Vector2(self.menu.tabRect.topleft)
 
                     # TODO menu options
                     if pygame.Rect(offsetButtonPos, button.rect.size).collidepoint(mPos):
@@ -111,14 +114,16 @@ class Simulation():
             # TODO Select Planet
             elif self.scene.rect.collidepoint(mPos):
                 for planet in self.scene.planetList.sprites():
+                    # BUG: planet rect not consistent with screen when zooming
                     planetOffsetRect : pygame.Rect = planet.rect.copy()
                     planetOffsetRect.topleft += cameraPos
                     planetOffsetRect.scale_by_ip(2)
+
                     if planetOffsetRect.collidepoint(mPos):
-                        self.selectedPlanet = planet
-                        print("Selected: " + planet.name)
+                        self.selectedPlanet.add(planet)
+                        break
                     elif self.selectedPlanet:
-                        self.selectedPlanet = None # Deselect
+                        self.selectedPlanet.empty() # Deselect
         
                 
 
