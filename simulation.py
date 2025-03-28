@@ -67,7 +67,7 @@ class Simulation():
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.MOUSEWHEEL:
-                self.scene.planetList.zoom += event.y * 0.03
+                self.scene.planetList.zoom += event.y * 0.02
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_PERIOD:
                     self.TIMESCALE += 0.25
@@ -83,8 +83,10 @@ class Simulation():
         else:
             self.scene.TIMESTEP = 0.1 * self.DELTATIME * self.TIMESCALE
     
+        #Zoom out
         if self.scene.planetList.zoom < 0.7:
             self.scene.planetList.zoom = 0.7
+        #Zoom in
         elif self.scene.planetList.zoom > 1.5:
             self.scene.planetList.zoom = 1.5
 
@@ -99,10 +101,9 @@ class Simulation():
             cameraPos.x += 10 / self.scene.planetList.zoom
         if mButtonsHold[2]:
             cameraPos += mDragPos / self.scene.planetList.zoom
-        # TODO CHANGE TIMESCALE
         
         if mButtonsPress[0]:
-            # TODO Select Menu
+            # TODO Menu Options
             if self.menu.rect.collidepoint(mPos):
                 for button in self.menu.menuList.sprites():
                     offsetButtonPos : pygame.Vector2 = pygame.Vector2(button.rect.topleft) + pygame.Vector2(self.menu.rect.topleft) + pygame.Vector2(self.menu.tabRect.topleft)
@@ -114,9 +115,8 @@ class Simulation():
             # TODO Select Planet
             elif self.scene.rect.collidepoint(mPos):
                 for planet in self.scene.planetList.sprites():
-                    # BUG: planet rect not consistent with screen when zooming
                     planetOffsetRect : pygame.Rect = planet.rect.copy()
-                    planetOffsetRect.topleft += cameraPos
+                    planetOffsetRect.topleft += cameraPos * self.scene.planetList.zoom
                     planetOffsetRect.scale_by_ip(2)
 
                     if planetOffsetRect.collidepoint(mPos):
