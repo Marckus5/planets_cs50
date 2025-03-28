@@ -77,7 +77,6 @@ class CameraGroup(pygame.sprite.Group):
     def draw(self, surface : pygame.Surface):
 
         self.displaySurface.fill('#000020')
-        #self.displaySurface.fill('grey')
 
         for sprite in self.sprites():
             offsetPos = sprite.rect.topleft + self.Pos + self.displayOffset
@@ -99,7 +98,6 @@ class CameraGroup(pygame.sprite.Group):
             return
 
         offsetPos = [point + self.Pos + self.displayOffset for point in planet.orbitLine]
-        
         pygame.draw.aalines(surface, planet.Color, False, offsetPos)
 
     def draw_velocity(self):
