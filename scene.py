@@ -18,13 +18,14 @@ class Scene():
         self.planetList = CameraGroup(self)
         self.planetSelect = pygame.sprite.GroupSingle()
 
+        # TODO unique ID for Planet
         sun = Planet(self, name = "sun", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
         earth = Planet(self, name = "earth", mass = 10, color = 'blue', radius = 4)
         moon = Planet(self, name = "moon", mass = 0, color = 'grey', radius = 2)
         mars = Planet(self, name = "mars", mass = 0, color = 'red', radius = 4)
         
-        earth.set_orbit(sun, 0, 200, 50, periapsisAngle=180, retrograde=False)
-        mars.set_orbit(sun, 0, 100, 200)
+        earth.set_orbit(sun, 0, 200, 190, periapsisAngle=180, retrograde=False)
+        mars.set_orbit(sun, 0, 400, 500)
         moon.set_orbit(earth, 0, 1, 1)
 
         sun1 = Planet(self, name = "sun1", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
@@ -33,7 +34,7 @@ class Scene():
         sun2.set_orbit(sun1, 0, 400, 200, periapsisAngle=180)
 
 
-        self.planetList.add(sun, earth)
+        self.planetList.add(sun, earth, mars)
 
 
     def run(self):
@@ -57,7 +58,7 @@ class CameraGroup(pygame.sprite.Group):
     def __init__(self, scene):
         super().__init__()
 
-        self.Pos = pygame.Vector2(0,0)
+        self.Pos : pygame.Vector2 = pygame.Vector2(0,0)
         self.scene = scene
 
         self.HALFSIZE = (self.scene.SIZE[0]//2, self.scene.SIZE[1]//2)
