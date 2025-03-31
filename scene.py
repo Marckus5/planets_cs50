@@ -1,8 +1,6 @@
 import pygame
 from planet import Planet
 
-# TODO: camera controls: right click: drag move camera; mouse wheel: zoom
-# 
 class Scene():
     
     def __init__(self, simulation, state : int):
@@ -41,19 +39,27 @@ class Scene():
 
     def run(self):
         self.planetList.update(self.planetList)
-
-
-        self.surface.fill('black')
-        
+        self.surface.fill('black')        
         self.blit_screen()
-        
-
-        
+                
     def blit_screen(self): #NOTE always called last!!!
         self.planetList.draw(self.surface)
 
         pygame.draw.rect(self.surface, 'grey', self.rect, width=1)
         self.simulation.screen.blit(self.surface,(0,0))
+
+
+    def add_planet(self, name: str, mass : float, color, radius : int,
+                   parent, initialAnomaly : float, apoapsis : float, periapsis : float, 
+                   periapsisAngle: float = 0, retrograde: bool = False, stationary : bool = False, position = pygame.Vector2(0,0)):
+        planet = Planet(self, name, mass, color, radius, stationary)
+        if not stationary:
+            planet.set_orbit(parent, initialAnomaly, apoapsis, periapsis, periapsisAngle, retrograde)
+            pass
+        else:
+            planet.Position = position
+
+
         
 
 class CameraGroup(pygame.sprite.Group):

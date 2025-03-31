@@ -19,20 +19,51 @@ class Menu():
         self.menuList = pygame.sprite.Group()
 
         self.tab = tab # TODO use for tabs
-        view = Button("tab_view","View", self.simulation.defaultFont, (self.MARGIN,10))
+
+        
         self.planetUIList = pygame.sprite.Group()
         self.planetList : pygame.sprite.Group = self.simulation.planetList
 
+        menuFont = self.simulation.defaultFont
+
         # Actions for View tab
         self.viewList = pygame.sprite.Group(
-            Text("Planet List:", self.simulation.defaultFont, (self.MARGIN, 20)),
-            Button("remove", "Remove Selected", self.simulation.defaultFont, (self.MARGIN, self.SIZE[1] * .75)),
-            Button("goto", "Go to Selected", self.simulation.defaultFont, (self.MARGIN, self.SIZE[1] * .8))
+            Text("Planet List:", menuFont, (self.MARGIN, 20)),
+            Button("remove", "Remove Selected", menuFont, (self.MARGIN, self.SIZE[1] * .75)),
+            Button("goto", "Go to Selected", menuFont, (self.MARGIN, self.SIZE[1] * .8))
             )
 
-        add = Button("tab_add","Add", self.simulation.defaultFont, (self.MARGIN + view.rect.right,10))
+        
 
+        isStationaryText = Text("Stationary", menuFont, (self.MARGIN, 20))
+        self.buttonStationary = CheckBox("checkbox_stationary", False, (isStationaryText.rect.right + 20, 20))
+
+        self.addOrbitPlanetList = pygame.sprite.Group(
+            isStationaryText, self.buttonStationary,
+            Text("Orbital Parameters", menuFont, (self.MARGIN, 60)),
+            Text("Initial Anomaly (degrees)", menuFont, (self.MARGIN, 100)),
+            Text("Apoapsis", menuFont, (self.MARGIN, 160)),
+            Text("Periapsis", menuFont, (self.MARGIN, 220)),
+            Text("Periapsis Angle", menuFont, (self.MARGIN, 280)),
+            Button("add", "Add Planet", menuFont, (self.MARGIN, self.SIZE[1] * .75)),
+        )
+        self.addStationaryPlanetList = pygame.sprite.Group(
+            isStationaryText, self.buttonStationary,
+            Text("Position", menuFont, (self.MARGIN, 60)),
+            Text("X-Value", menuFont, (self.MARGIN, 80)), TextBox("input_x", "e.g. 10", menuFont, (self.MARGIN + 80, 80), numOnly=True),
+            Text("Y-Value", menuFont, (self.MARGIN, 120)), TextBox("input_y", "e.g. 10", menuFont, (self.MARGIN + 80, 120), numOnly=True),
+            Button("add", "Add Planet", menuFont, (self.MARGIN, self.SIZE[1] * .75)),
+        )
+
+
+
+        view = Button("tab_view","View", menuFont, (self.MARGIN,10))
+        add = Button("tab_add","Add", menuFont, (self.MARGIN + view.rect.right,10))
         self.tabList = pygame.sprite.Group(view, add)
+
+        # timescaling
+        slow = Button("slow","<", menuFont, (self.MARGIN,10))
+        fast = Button("fast","<", menuFont, (self.MARGIN,10))
 
         
         # list of functions for each tab
@@ -55,8 +86,9 @@ class Menu():
         
         if self.tab == 0:
             self.render_planet_list()
-            self.render_view_list()
+            
         elif self.tab == 1:
+            self.render_add_planet()
             pass
         self.menuList.draw(self.tabSurface)
         
@@ -91,11 +123,18 @@ class Menu():
             y += 40
 
         self.planetUIList.draw(self.tabSurface)
+        self.menuList = self.viewList.copy()
 
             
-    def render_view_list(self):
+    def render_add_planet(self):
+        
+        if self.buttonStationary.enabled:
+            self.menuList = self.addStationaryPlanetList.copy()
+        else:
+            self.menuList = self.addOrbitPlanetList.copy()
+        pass
 
-        self.menuList = self.viewList.copy()
+        
     
 
 class Button(pygame.sprite.Sprite):
@@ -111,10 +150,57 @@ class Button(pygame.sprite.Sprite):
 class Text(pygame.sprite.Sprite):
     def __init__(self, text : str, font : pygame.Font, position: tuple = (0,0) , fontColor = "#0f0f0f"):
         super().__init__()
-        self.id = id #use for functions
         self.image = font.render(text, True, fontColor)
         self.rect = self.image.get_rect()
         #pygame.draw.rect(self.image, 'red', self.rect, 5)
         self.Position = position
         self.rect.move_ip(self.Position)
+
+class TextBox(pygame.sprite.Sprite):
+    def __init__(self, id : str, placeholder : str, font : pygame.Font, position: tuple = (0,0) , fontColor = "#0f0f0f", wrapLength = 320, numOnly : bool = False):
+        super().__init__()
+        self.id = id #use for functions
+        self.font = font
+        self.fontColor = fontColor
+        self.placeholder = placeholder
+        self.wrapLength = wrapLength
+        self.image = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+        self.rect = self.image.get_rect(size = (wrapLength,20))
+        #pygame.draw.rect(self.image, 'red', self.rect, 5)
+        self.Position = position
+        self.rect.move_ip(self.Position)
+
+        self.value : str = ''
+
+        self.selected = False
+
+        self.numOnly = numOnly
+
+    def update(self):
+        if self.selected:
+            self.image = self.font.render(self.value, True, self.fontColor, 'red', self.wrapLength)
+        elif not bool(self.value):
+            self.image = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+
+class CheckBox(pygame.sprite.Sprite):
+    def __init__(self, id : str, enabled : bool, position: tuple = (0,0)):
+        super().__init__()
+        self.id = id #use for functions
+        self.image = pygame.Surface((20,20))
+        self.rect = pygame.draw.rect(self.image, 'black', ((0,0), (20,20)))
+        pygame.draw.rect(self.image, 'white', ((2,2), (16,16)))
+
+        self.Position = position
+        self.rect.move_ip(self.Position)
+
+        self.enabled = enabled
+        
+        
+
+    def update(self):
+        if self.enabled:
+            pygame.draw.rect(self.image, 'red', ((2,2), pygame.Vector2(self.rect.size) * 0.8))
+        else:
+            pygame.draw.rect(self.image, 'black', ((0,0),self.rect.size))
+            pygame.draw.rect(self.image, 'white', ((2,2), pygame.Vector2(self.rect.size) * 0.8))
 
