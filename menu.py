@@ -137,12 +137,12 @@ class Menu():
         # TODO make it so that this only updates when planetList changes
         self.planetUIList.empty()
         for planet in self.planetList.sprites():
-            button = Button("planet_"+planet.name, planet.name, self.simulation.defaultFont, (self.MARGIN,y))
+            button = Button("planet_"+planet.name, planet.name+f" Mass:{planet.Mass : 2.0e}\n X:{planet.Position.x: 3.2e} Y:{planet.Position.y : 3.2e}", self.simulation.defaultFont, (self.MARGIN,y))
             button.planet = planet
             self.planetUIList.add(
                 button
             )
-            y += 40
+            y += 60
 
         self.planetUIList.draw(self.tabSurface)
         self.menuList = self.viewList.copy()

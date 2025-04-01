@@ -18,20 +18,15 @@ class Scene():
 
         # TODO unique ID for Planet
         sun = Planet(self, name = "sun", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
-        venus = Planet(self, name = "venus", mass = 100, color = 'yellow', radius = 4)
-        earth = Planet(self, name = "earth", mass = 100, color = 'blue', radius = 4)
+        venus = Planet(self, name = "venus", mass = 900, color = 'yellow', radius = 4)
+        earth = Planet(self, name = "earth", mass = 1000, color = 'blue', radius = 4)
         moon = Planet(self, name = "moon", mass = 0, color = 'grey', radius = 2)
-        mars = Planet(self, name = "mars", mass = 50, color = 'red', radius = 4)
+        mars = Planet(self, name = "mars", mass = 500, color = 'red', radius = 4)
         
         venus.set_orbit(sun, 80, 150, 160, periapsisAngle=75, retrograde=False)
         earth.set_orbit(sun, 30, 220, 280, periapsisAngle=180, retrograde=False)
         mars.set_orbit(sun, 20, 400, 500)
         moon.set_orbit(earth, 0, 1, 1)
-
-        sun1 = Planet(self, name = "sun1", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
-        sun2 = Planet(self, name = "sun2", mass = 10e+6, color = 'yellow', radius = 16, stationary=False)
-        sun1.set_orbit(sun2, 0, 400, 200)
-        sun2.set_orbit(sun1, 0, 400, 200, periapsisAngle=180)
 
 
         self.planetList.add(sun, venus, earth, mars, moon)
