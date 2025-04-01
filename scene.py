@@ -34,7 +34,7 @@ class Scene():
         sun2.set_orbit(sun1, 0, 400, 200, periapsisAngle=180)
 
 
-        self.planetList.add(sun, venus, earth, mars)
+        self.planetList.add(sun, venus, earth, mars, moon)
 
 
     def run(self):
@@ -52,12 +52,19 @@ class Scene():
     def add_planet(self, name: str, mass : float, color, radius : int,
                    parent, initialAnomaly : float, apoapsis : float, periapsis : float, 
                    periapsisAngle: float = 0, retrograde: bool = False, stationary : bool = False, position = pygame.Vector2(0,0)):
+        
+        # ensure name for every planet is unique
+        for planet in self.planetList.sprites():
+            if name == planet.name:
+                print("New Planet must have unique name")
+                return
+
         planet = Planet(self, name, mass, color, radius, stationary)
         if not stationary:
             planet.set_orbit(parent, initialAnomaly, apoapsis, periapsis, periapsisAngle, retrograde)
-            pass
         else:
-            planet.Position = position
+            planet.Position = pygame.Vector2(position)
+        self.planetList.add(planet)
 
 
         

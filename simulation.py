@@ -1,8 +1,10 @@
 import pygame
 import sys
+import random
 
 from menu import *
 from scene import *
+
 
 class Simulation():
     TIMESCALE : float = 0.05
@@ -158,28 +160,79 @@ class Simulation():
                     # indexing for saving values
                     if type(UIElement) == TextBox:
                         self.UIDict[UIElement.id] = UIElement.value
+                        self.UIDict[UIElement.id + '_numOnly'] = UIElement.numOnly
                     if type(UIElement) == CheckBox:
                         self.UIDict[UIElement.id] = UIElement.enabled
 
                     
                     if collision:
                         if self.selectedPlanet.sprite and type(UIElement) == Button:
-                            if UIElement.id == "remove":
-                                self.scene.planetList.remove(self.selectedPlanet.sprite)
-                            elif UIElement.id == "goto":
-                                # each component is individually changed due to different conventions
-                                # right for the camera position is negative
-                                cameraPos.x += -self.selectedPlanet.sprite.Position.x - cameraPos.x
-                                cameraPos.y += self.selectedPlanet.sprite.Position.y - cameraPos.y
-                                self.followobject = True
+                            if self.menu.tab == 0:
+                                if UIElement.id == "remove":
+                                    self.scene.planetList.remove(self.selectedPlanet.sprite)
+                                elif UIElement.id == "goto":
+                                    # each component is individually changed due to different conventions
+                                    # right for the camera position is negative
+                                    cameraPos.x += -self.selectedPlanet.sprite.Position.x - cameraPos.x
+                                    cameraPos.y += self.selectedPlanet.sprite.Position.y - cameraPos.y
+                                    self.followobject = True
 
-                        elif self.menu.tab == 1 and type(UIElement) == Button:
-                            if UIElement.id == "add":
-                                for key, element in self.UIDict.items():
-                                    pass
+                            if self.menu.tab == 1:
+                                if UIElement.id == "add":
+                                    print("add")
+                                    for key, element in self.UIDict.items():
+                                        # convert to appropriate data types
+                                        try:
+                                            # TODO differentiate between color (int) and other values (float)
+                                            if self.UIDict[key] == '' and self.UIDict[key+'_numOnly']:
+                                                print(f"Missing Values! {key} Putting random values in range 0-255")
+                                                self.UIDict[key] = random.randrange(1, 255)
+                                                print(f"{self.UIDict[key]}")
+                                            else:
+                                                self.UIDict[key] = float(element)
+                                            
+                                            
+                                        # if the element is not a float (i.e. the name)
+                                        except ValueError:
+                                            
+                                            pass
+
+                                    if self.UIDict["input_name"] == '':
+                                        print("Invalid Name")
+                                        continue
+
+                                    try:
+                                        # TODO determine radius from mass
+                                        radius = self.UIDict["input_mass"]/100 if self.UIDict["input_mass"]/10 > 1 else 1
+                                        if radius > 64:
+                                            radius = 64
+
+                                        
+                                        if self.UIDict["checkbox_stationary"]:
+                                            self.scene.add_planet(self.UIDict["input_name"],
+                                                                self.UIDict["input_mass"],
+                                                                (self.UIDict["input_color_r"],self.UIDict["input_color_g"],self.UIDict["input_color_b"]),
+                                                                radius,
+                                                                None, 0, 0, 0, 0, False, True, 
+                                                                (self.UIDict["input_x"], self.UIDict["input_y"])
+                                                                )
+                                        else:
+                                            self.scene.add_planet(self.UIDict["input_name"],
+                                                                self.UIDict["input_mass"],
+                                                                (self.UIDict["input_color_r"],self.UIDict["input_color_g"],self.UIDict["input_color_b"]),
+                                                                radius,
+                                                                self.selectedPlanet.sprite, 
+                                                                self.UIDict["input_anomaly"], 
+                                                                self.UIDict["input_apoapsis"], 
+                                                                self.UIDict["input_periapsis"], 
+                                                                self.UIDict["input_periapsis_angle"], False
+                                                                )
+                                    except AttributeError:
+                                        # if there is a missing value in the dictionary
+                                        print("Whoops! You're missing some values!")
                                     
 
-                        # add tab
+                        # for the add tab
                         elif type(UIElement) == CheckBox:
                             UIElement.enabled = not UIElement.enabled
                             UIElement.update()
@@ -205,13 +258,13 @@ class Simulation():
                     # BUG weird behavior when zoomed
                     planetOffsetRect : pygame.Rect = planet.rect.copy()
                     
-                    #planetOffsetRect.scale_by_ip((2 * self.scene.planetList.zoom, 2 * self.scene.planetList.zoom))
+                    planetOffsetRect.scale_by_ip((2 * self.scene.planetList.zoom, 2 * self.scene.planetList.zoom))
                     #planetOffsetRect.top *= self.scene.planetList.zoom
                     #planetOffsetRect.left *= self.scene.planetList.zoom
-                    planetOffsetRect.topleft = cameraPos * self.scene.planetList.zoom + planet.rect.topleft
+                    planetOffsetRect.topleft += cameraPos * self.scene.planetList.zoom
 
                     if planetOffsetRect.collidepoint(mPos):
-                        print(planet.name, cameraPos, planet.Position)
+                        #print(planet.name, cameraPos, planet.Position)
                         self.selectedPlanet.add(planet)
                         break
                     elif self.selectedPlanet:

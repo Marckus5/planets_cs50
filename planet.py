@@ -36,7 +36,7 @@ class Planet(pygame.sprite.Sprite):
         self.isStationary = stationary
 
         self.orbitLine = []
-        self.orbitLineLen : int = 500
+        self.orbitLineLen : int = 1000
 
     def update(self, planets : pygame.sprite.Group):
         if self.isStationary:
@@ -62,6 +62,7 @@ class Planet(pygame.sprite.Sprite):
         
 
     def attraction(self, body):
+
         angle= atan2(self.Position.y - body.Position.y , self.Position.x - body.Position.x)
         #angle = radians(pygame.Vector2(1,0).angle_to(self.Position))
         distance = (self.Position - body.Position).length()

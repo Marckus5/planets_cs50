@@ -38,21 +38,43 @@ class Menu():
         isStationaryText = Text("Stationary", menuFont, (self.MARGIN, 20))
         self.buttonStationary = CheckBox("checkbox_stationary", False, (isStationaryText.rect.right + 20, 20))
 
+        buttonAddPlanet = Button("add", "Add Planet", menuFont, (self.MARGIN, self.SIZE[1] * .75))
+
         self.addOrbitPlanetList = pygame.sprite.Group(
             isStationaryText, self.buttonStationary,
-            Text("Orbital Parameters", menuFont, (self.MARGIN, 60)),
-            Text("Initial Anomaly (degrees)", menuFont, (self.MARGIN, 100)),
-            Text("Apoapsis", menuFont, (self.MARGIN, 160)),
-            Text("Periapsis", menuFont, (self.MARGIN, 220)),
-            Text("Periapsis Angle", menuFont, (self.MARGIN, 280)),
-            Button("add", "Add Planet", menuFont, (self.MARGIN, self.SIZE[1] * .75)),
+            Text("Name", menuFont, (self.MARGIN, 60)),
+            TextBox("input_name", "e.g. Earth", menuFont, (self.MARGIN, 80), numOnly=False),
+            Text("Mass", menuFont, (self.MARGIN, 120)),
+            TextBox("input_mass", "e.g. 100", menuFont, (self.MARGIN, 140), numOnly=True),
+            Text("Color (RGB): 0 - 255", menuFont, (self.MARGIN, 180)),
+            TextBox("input_color_r", "R", menuFont, (self.MARGIN, 200), numOnly=True, wrapLength= 60),
+            TextBox("input_color_g", "G", menuFont, (self.MARGIN + 80, 200), numOnly=True, wrapLength= 60),
+            TextBox("input_color_b", "B", menuFont, (self.MARGIN + 160, 200), numOnly=True, wrapLength= 60),
+            Text("Orbital Parameters", menuFont, (self.MARGIN, 240)),
+            Text("Initial Anomaly (degrees)", menuFont, (self.MARGIN, 280)),
+            TextBox("input_anomaly", "e.g. 10", menuFont, (self.MARGIN, 300), numOnly=True),
+            Text("Apoapsis", menuFont, (self.MARGIN, 340)),
+            TextBox("input_apoapsis", "e.g. 10", menuFont, (self.MARGIN, 360), numOnly=True),
+            Text("Periapsis", menuFont, (self.MARGIN, 400)),
+            TextBox("input_periapsis", "e.g. 10", menuFont, (self.MARGIN, 420), numOnly=True),
+            Text("Periapsis Angle", menuFont, (self.MARGIN, 460)),
+            TextBox("input_periapsis_angle", "e.g. 10", menuFont, (self.MARGIN, 480), numOnly=True),
+            buttonAddPlanet
         )
         self.addStationaryPlanetList = pygame.sprite.Group(
             isStationaryText, self.buttonStationary,
-            Text("Position", menuFont, (self.MARGIN, 60)),
-            Text("X-Value", menuFont, (self.MARGIN, 80)), TextBox("input_x", "e.g. 10", menuFont, (self.MARGIN + 80, 80), numOnly=True),
-            Text("Y-Value", menuFont, (self.MARGIN, 120)), TextBox("input_y", "e.g. 10", menuFont, (self.MARGIN + 80, 120), numOnly=True),
-            Button("add", "Add Planet", menuFont, (self.MARGIN, self.SIZE[1] * .75)),
+            Text("Name", menuFont, (self.MARGIN, 60)),
+            TextBox("input_name", "e.g. Earth", menuFont, (self.MARGIN, 80), numOnly=False),
+            Text("Mass", menuFont, (self.MARGIN, 120)),
+            TextBox("input_mass", "e.g. 100", menuFont, (self.MARGIN, 140), numOnly=True),
+            Text("Color (RGB): 0 - 255", menuFont, (self.MARGIN, 180)),
+            TextBox("input_color_r", "R", menuFont, (self.MARGIN, 200), numOnly=True, wrapLength= 60),
+            TextBox("input_color_g", "G", menuFont, (self.MARGIN + 80, 200), numOnly=True, wrapLength= 60),
+            TextBox("input_color_b", "B", menuFont, (self.MARGIN + 160, 200), numOnly=True, wrapLength= 60),
+            Text("Position", menuFont, (self.MARGIN, 240)),
+            Text("X-Value", menuFont, (self.MARGIN, 260)), TextBox("input_x", "e.g. 10", menuFont, (self.MARGIN + 80, 260), numOnly=True),
+            Text("Y-Value", menuFont, (self.MARGIN, 290)), TextBox("input_y", "e.g. 10", menuFont, (self.MARGIN + 80, 280), numOnly=True),
+            buttonAddPlanet
         )
 
 
@@ -127,12 +149,8 @@ class Menu():
 
             
     def render_add_planet(self):
-        
-        if self.buttonStationary.enabled:
-            self.menuList = self.addStationaryPlanetList.copy()
-        else:
-            self.menuList = self.addOrbitPlanetList.copy()
-        pass
+        self.menuList = self.addStationaryPlanetList.copy() if self.buttonStationary.enabled else self.addOrbitPlanetList.copy()
+
 
         
     
@@ -157,30 +175,39 @@ class Text(pygame.sprite.Sprite):
         self.rect.move_ip(self.Position)
 
 class TextBox(pygame.sprite.Sprite):
-    def __init__(self, id : str, placeholder : str, font : pygame.Font, position: tuple = (0,0) , fontColor = "#0f0f0f", wrapLength = 320, numOnly : bool = False):
+    def __init__(self, id : str, placeholder : str, font : pygame.Font, position: tuple = (0,0) , fontColor = "#0f0f0f", wrapLength = 200, numOnly : bool = False):
         super().__init__()
         self.id = id #use for functions
         self.font = font
         self.fontColor = fontColor
         self.placeholder = placeholder
         self.wrapLength = wrapLength
-        self.image = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
-        self.rect = self.image.get_rect(size = (wrapLength,20))
-        #pygame.draw.rect(self.image, 'red', self.rect, 5)
+        self.image = pygame.Surface((self.wrapLength,20))
+        self.rect = self.image.get_rect()
+        self.image.fill('white')
+
         self.Position = position
         self.rect.move_ip(self.Position)
 
+        self.textSurface = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+        self.image.blit(self.textSurface, (0, 0, self.wrapLength, 20))
+
         self.value : str = ''
-
         self.selected = False
-
         self.numOnly = numOnly
 
     def update(self):
         if self.selected:
-            self.image = self.font.render(self.value, True, self.fontColor, 'red', self.wrapLength)
+            self.textSurface = self.font.render(self.value, True, self.fontColor, 'grey', self.wrapLength)
         elif not bool(self.value):
-            self.image = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+            self.textSurface = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+            #self.image = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
+        else:
+            self.textSurface = self.font.render(self.value, True, self.fontColor, 'white', self.wrapLength)
+            #self.image = self.font.render(self.value, True, self.fontColor, 'white', self.wrapLength)
+        textRect = self.textSurface.get_rect()
+        self.image.fill("white")
+        self.image.blit(self.textSurface, (textRect.left, 0, self.wrapLength, 20))
 
 class CheckBox(pygame.sprite.Sprite):
     def __init__(self, id : str, enabled : bool, position: tuple = (0,0)):
@@ -194,8 +221,6 @@ class CheckBox(pygame.sprite.Sprite):
         self.rect.move_ip(self.Position)
 
         self.enabled = enabled
-        
-        
 
     def update(self):
         if self.enabled:
