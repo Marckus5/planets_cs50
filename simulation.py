@@ -203,7 +203,7 @@ class Simulation():
 
                                     try:
                                         # TODO determine radius from mass
-                                        radius = self.UIDict["input_mass"]/100 if self.UIDict["input_mass"]/10 > 1 else 1
+                                        radius = self.UIDict["input_mass"]/10 if self.UIDict["input_mass"]/10 > 4 else 4
                                         if radius > 64:
                                             radius = 64
 
