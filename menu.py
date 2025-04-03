@@ -135,7 +135,7 @@ class Menu():
     def render_stats(self):
         '''render zoom level and timescaling'''
         text1 : pygame.Surface = self.simulation.defaultFont.render(f"Timescale: {self.simulation.TIMESCALE}", True, '#0f0f0f')
-        text2 : pygame.Surface = self.simulation.defaultFont.render(f"Zoom: x{self.simulation.scene.planetList.zoom : 3.2f}", True, '#0f0f0f')
+        text2 : pygame.Surface = self.simulation.defaultFont.render(f"Zoom: x{self.simulation.scene.planetList.zoom **4: 1.2f}", True, '#0f0f0f')
 
         textRect1 = text1.get_rect(bottomright = (self.SIZE[0] - 20, self.SIZE[1]))
         textRect2 = text2.get_rect(bottomright = (self.SIZE[0] - 20, textRect1.top))
