@@ -7,7 +7,7 @@ from scene import *
 
 
 class Simulation():
-    TIMESCALE : float = 0.05
+    TIMESCALE : float = 1
     def __init__(self, windowWidth : int, windowHeight : int):
         pygame.init()
         self.running : bool = True
@@ -100,10 +100,10 @@ class Simulation():
                     
                     
         # Timescaling
-        if self.TIMESCALE < 0.5:
-            self.TIMESCALE = 0.5
-        elif self.TIMESCALE > 5.0:
-            self.TIMESCALE = 4.0
+        if self.TIMESCALE < 0.25:
+            self.TIMESCALE = 0.25
+        elif self.TIMESCALE > 2.0:
+            self.TIMESCALE = 2.0
         else:
             self.scene.TIMESTEP = 0.1 * self.DELTATIME * self.TIMESCALE
         # Zoom out
@@ -155,7 +155,6 @@ class Simulation():
                     offsetButtonPos : pygame.Vector2 = pygame.Vector2(UIElement.rect.topleft) + pygame.Vector2(self.menu.rect.topleft) + pygame.Vector2(self.menu.tabRect.topleft)
                     rect = pygame.Rect(offsetButtonPos, UIElement.rect.size)
                     collision = rect.collidepoint(mPos)
-
                     
                     # indexing for saving values
                     if type(UIElement) == TextBox:
@@ -179,17 +178,28 @@ class Simulation():
 
                             if self.menu.tab == 1:
                                 if UIElement.id == "add":
-                                    print("add")
+
                                     for key, element in self.UIDict.items():
+
                                         # convert to appropriate data types
                                         try:
                                             # TODO differentiate between color (int) and other values (float)
-                                            if self.UIDict[key] == '' and self.UIDict[key+'_numOnly']:
+                                            
+                                            if element == '' and self.UIDict[key+'_numOnly'] and key != 'input_name':
                                                 print(f"Missing Values! {key} Putting random values in range 0-255")
                                                 self.UIDict[key] = random.randrange(1, 255)
-                                                print(f"{self.UIDict[key]}")
+                                                print(f"{element}")
                                             else:
                                                 self.UIDict[key] = float(element)
+
+                                            # for limiting color values to 0-255
+                                            if key == 'input_color_r' or key == 'input_color_g' or key == 'input_color_b':
+                                                if int(element) > 255:
+                                                    self.UIDict[key] = 255
+                                                elif int(element) < 0:
+                                                    self.UIDict[key] = 0
+                                            
+                                            
                                             
                                             
                                         # if the element is not a float (i.e. the name)
@@ -214,7 +224,7 @@ class Simulation():
                                                                 (self.UIDict["input_color_r"],self.UIDict["input_color_g"],self.UIDict["input_color_b"]),
                                                                 radius,
                                                                 None, 0, 0, 0, 0, False, True, 
-                                                                (self.UIDict["input_x"], self.UIDict["input_y"])
+                                                                (self.UIDict["input_x"] + self.selectedPlanet.sprite.Position.x, self.UIDict["input_y"] + self.selectedPlanet.sprite.Position.y)
                                                                 )
                                         else:
                                             self.scene.add_planet(self.UIDict["input_name"],
@@ -230,10 +240,12 @@ class Simulation():
                                     except AttributeError:
                                         # if there is a missing value in the dictionary
                                         print("Whoops! You're missing some values!")
+                        else:
+                            print("Error: No Planet Selected")
                                     
 
                         # for the add tab
-                        elif type(UIElement) == CheckBox:
+                        if type(UIElement) == CheckBox:
                             UIElement.enabled = not UIElement.enabled
                             UIElement.update()
                         elif type(UIElement) == TextBox:
@@ -255,7 +267,7 @@ class Simulation():
             # TODO Select Planet from scene
             elif self.scene.rect.collidepoint(mPos):
                 for planet in self.scene.planetList.sprites():
-                    # BUG weird behavior when zoomed
+                    # BUG innacurate hitbox when zoomed
                     planetOffsetRect : pygame.Rect = planet.rect.copy()
                     
                     planetOffsetRect.scale_by_ip((2 * self.scene.planetList.zoom, 2 * self.scene.planetList.zoom))
@@ -269,18 +281,7 @@ class Simulation():
                         break
                     elif self.selectedPlanet:
                         self.selectedPlanet.empty() # Deselect
-
-
-
-        for planet in self.scene.planetList.sprites():
-                planetOffsetRect : pygame.Rect = planet.rect.copy()
-                
-                planetOffsetRect.scale_by_ip((2 * self.scene.planetList.zoom, 2 * self.scene.planetList.zoom))
-                planetOffsetRect.topleft += cameraPos
-
-                pygame.draw.rect(self.scene.planetList.displaySurface, 'red', planetOffsetRect, 1)
         
-
 
 
 

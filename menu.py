@@ -120,6 +120,8 @@ class Menu():
     def update(self):
         self.render_selected()
 
+        self.render_stats()
+
     def render_selected(self):
         '''Shows the selected planet object'''
 
@@ -130,6 +132,13 @@ class Menu():
         textRect = text.get_rect(bottomleft = (0, self.SIZE[1]))
         self.surface.blit(text, textRect)
 
+    def render_stats(self):
+        '''render zoom level and timescaling'''
+        text : pygame.Surface = self.simulation.defaultFont.render(f"Time: {self.simulation.TIMESCALE}", True, '#0f0f0f')
+        
+        textRect = text.get_rect(bottomright = (self.SIZE[0] - 20, self.SIZE[1]))
+        self.surface.blit(text, textRect)
+
     def render_planet_list(self):
         '''lists all planets'''
 
@@ -137,7 +146,10 @@ class Menu():
         # TODO make it so that this only updates when planetList changes
         self.planetUIList.empty()
         for planet in self.planetList.sprites():
-            button = Button("planet_"+planet.name, planet.name+f" Mass:{planet.Mass : 2.0e}\n X:{planet.Position.x: 3.2e} Y:{planet.Position.y : 3.2e}", self.simulation.defaultFont, (self.MARGIN,y))
+            # if planet name is all numbers
+            if type(planet.name) != str:
+                planet.name = str(int(planet.name))
+            button = Button("planet_"+ planet.name, planet.name+f" Mass:{planet.Mass : 2.0e}\n X:{planet.Position.x: 3.2e} Y:{planet.Position.y : 3.2e}", self.simulation.defaultFont, (self.MARGIN,y))
             button.planet = planet
             self.planetUIList.add(
                 button
@@ -190,7 +202,8 @@ class TextBox(pygame.sprite.Sprite):
         self.rect.move_ip(self.Position)
 
         self.textSurface = self.font.render(self.placeholder, True, self.fontColor, 'white', self.wrapLength)
-        self.image.blit(self.textSurface, (0, 0, self.wrapLength, 20))
+        textRect = self.textSurface.get_rect(right = self.rect.width)
+        self.image.blit(self.textSurface, (textRect.left, 0, self.wrapLength, 20))
 
         self.value : str = ''
         self.selected = False
@@ -205,7 +218,7 @@ class TextBox(pygame.sprite.Sprite):
         else:
             self.textSurface = self.font.render(self.value, True, self.fontColor, 'white', self.wrapLength)
             #self.image = self.font.render(self.value, True, self.fontColor, 'white', self.wrapLength)
-        textRect = self.textSurface.get_rect()
+        textRect = self.textSurface.get_rect(right = self.rect.width)
         self.image.fill("white")
         self.image.blit(self.textSurface, (textRect.left, 0, self.wrapLength, 20))
 
