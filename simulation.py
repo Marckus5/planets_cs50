@@ -105,7 +105,7 @@ class Simulation():
         elif self.TIMESCALE > 2.0:
             self.TIMESCALE = 2.0
         else:
-            self.scene.TIMESTEP = 0.1 * self.DELTATIME * self.TIMESCALE
+            self.scene.TIMESTEP = 0.05 * self.DELTATIME * self.TIMESCALE
         # Zoom out
         if self.scene.planetList.zoom < 0.7:
             self.scene.planetList.zoom = 0.7

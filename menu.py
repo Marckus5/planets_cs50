@@ -134,10 +134,13 @@ class Menu():
 
     def render_stats(self):
         '''render zoom level and timescaling'''
-        text : pygame.Surface = self.simulation.defaultFont.render(f"Time: {self.simulation.TIMESCALE}", True, '#0f0f0f')
-        
-        textRect = text.get_rect(bottomright = (self.SIZE[0] - 20, self.SIZE[1]))
-        self.surface.blit(text, textRect)
+        text1 : pygame.Surface = self.simulation.defaultFont.render(f"Timescale: {self.simulation.TIMESCALE}", True, '#0f0f0f')
+        text2 : pygame.Surface = self.simulation.defaultFont.render(f"Zoom: x{self.simulation.scene.planetList.zoom : 3.2f}", True, '#0f0f0f')
+
+        textRect1 = text1.get_rect(bottomright = (self.SIZE[0] - 20, self.SIZE[1]))
+        textRect2 = text2.get_rect(bottomright = (self.SIZE[0] - 20, textRect1.top))
+        self.surface.blit(text1, textRect1)
+        self.surface.blit(text2, textRect2)
 
     def render_planet_list(self):
         '''lists all planets'''

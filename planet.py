@@ -5,12 +5,6 @@ from math import sin, cos, atan2, sqrt, cos, radians, pi
 WHITE = (255,255,255)
 
 class Planet(pygame.sprite.Sprite):
-    
-    AU : float = 149.6e9
-    G : float = 6.67428e-11
-    SCALE : float = 50/AU
-    
-
     def __init__(self, scene, name: str, mass : float, color, radius : int, stationary : bool = False):
         super().__init__()
         self.scene = scene
