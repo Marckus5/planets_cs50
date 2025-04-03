@@ -169,6 +169,7 @@ class Simulation():
                             if self.menu.tab == 0:
                                 if UIElement.id == "remove":
                                     self.scene.planetList.remove(self.selectedPlanet.sprite)
+                                    self.selectedPlanet.clear()
                                 elif UIElement.id == "goto":
                                     # each component is individually changed due to different conventions
                                     # right for the camera position is negative
